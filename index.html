@@ -436,6 +436,22 @@
 	// Bee asset injection
 	/** @type {Document|null} */
 	let beesSvgDoc = null;
+	function getFallbackBeeSVG() {
+		return "<svg viewBox='0 0 140 140' width='100%' height='100%' aria-hidden='true'>"
+			+ "<defs><radialGradient id='gwing_fb' cx='50%' cy='50%' r='50%'>"
+			+ "<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/></radialGradient>"
+			+ "<clipPath id='beeClip_fb'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath></defs><g>"
+			+ "<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>"
+			+ "<g clip-path='url(#beeClip_fb)'><rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/><rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/></g>"
+			+ "<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>"
+			+ "<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>"
+			+ "<circle cx='54' cy='66' r='4' fill='#5a3b2e'/><circle cx='86' cy='66' r='4' fill='#5a3b2e'/>"
+			+ "<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>"
+			+ "<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing_fb)'/><ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing_fb)'/>"
+			+ "<circle cx='36' cy='30' r='4' fill='#5a3b2e'/><path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>"
+			+ "<circle cx='104' cy='30' r='4' fill='#5a3b2e'/><path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>"
+			+ "<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/></g></svg>";
+	}
 	function loadBeesSvg() {
 		return new Promise(function(resolve, reject) {
 			if (beesSvgDoc) { resolve(beesSvgDoc); return; }
@@ -454,7 +470,7 @@
 			const groups = root.querySelectorAll(':scope > g');
 			const idx = Math.max(1, Math.min(variant, groups.length)) - 1;
 			const g = groups[idx] ? groups[idx].cloneNode(true) : null;
-			if (!g) return;
+			if (!g) { el.innerHTML = getFallbackBeeSVG(); return; }
 			const svgNS = 'http://www.w3.org/2000/svg';
 			const svg = document.createElementNS(svgNS, 'svg');
 			svg.setAttribute('viewBox', root.getAttribute('viewBox') || '0 0 4000 4000');
@@ -464,9 +480,17 @@
 			svg.appendChild(g);
 			el.innerHTML = '';
 			el.appendChild(svg);
-		}).catch(function() {
-			// Fallback: do nothing if asset fails to load
-		});
+			// Fit viewBox to the group's bounds for crisp scaling
+			try {
+				// Use rAF to ensure DOM has a chance to layout the SVG
+				requestAnimationFrame(function() {
+					const bb = g.getBBox();
+					if (bb && bb.width > 0 && bb.height > 0) {
+						svg.setAttribute('viewBox', bb.x + ' ' + bb.y + ' ' + bb.width + ' ' + bb.height);
+					}
+				});
+			} catch(e) { /* ignore */ }
+		}).catch(function() { el.innerHTML = getFallbackBeeSVG(); });
 	}
 
 	// Initialize
