@@ -1,0 +1,91 @@
+## Marija’s Birthday Garden — Context for AI Agents
+
+### Overview
+Marija’s Birthday Garden is a short, browser-based mobile game built as a single static page (`index.html`) using pure HTML/CSS/JS. The game runs smoothly on iPhone Safari, lasts ~3–5 minutes, and ends by revealing a QR code linking to a gift card. The theme is cute, pastel, birthday-themed, starring a kawaii bee named Bella.
+
+### Player Goal
+- Help Bella wake the garden by interacting with the scene in simple, tactile steps.
+- Progress through scenes (buds → watering → butterflies → grand bloom) and receive a final birthday message with a QR code that links to a gift card.
+
+### Target Platform and Constraints
+- Optimized for Safari on iPhone (touch-first interactions, fast load, no frameworks).
+- Single-file delivery (one `index.html`), no build step.
+- Lightweight CSS animations and WebAudio for sound effects.
+
+### Visual and UX Style
+- Palette: pastel pink accent with soft yellows, lilac, and mint.
+- Typography: rounded, playful, clean (system rounded-friendly fonts).
+- Animations: smooth, snappy, sparkles, light bounce.
+- UI: minimal but beautiful; instructions do not obstruct gameplay.
+
+### Audio (WebAudio, synth-based)
+- Background: soft, cheerful loop (very lightweight randomized bleeps).
+- Interactions: bloom twinkle, gentle pour noise, butterfly flutter, final fanfare.
+- Audio starts on first user interaction (to satisfy mobile autoplay policies).
+
+### Game Flow (Scene-by-Scene)
+1. Introduction
+   - Background sunrise meadow.
+   - Bella flies in (bee bob + fly-in animation) and shows a speech bubble intro.
+   - CTA button: “Yes, I’ll help!” with gentle chime on tap.
+
+2. First Flowers (tap-to-bloom)
+   - Wilted buds appear.
+   - Player taps buds → each blooms; sparkles and twinkle sound.
+   - On completion, Bella praises the player; “Next” button appears.
+
+3. Watering the Garden (drag interaction)
+   - Watering can appears (pointer/touch drag).
+   - Drag over dry soil → flowers bloom at those spots; water pour sound + chime.
+   - On completion, dialogue updates; “Next” button appears.
+
+4. Butterfly Helpers (tap-to-hatch)
+   - Cocoons appear.
+   - Player taps cocoons → butterflies emerge and flutter; flutter sound.
+   - On completion, dialogue updates; “Next” button appears.
+
+5. Grand Bloom + QR Reveal
+   - Lush scene: flowers, butterflies, confetti.
+   - Bella announces a gift; QR card rises in the center.
+   - Final text message + button to open the gift link.
+
+### Technical Implementation (High-Level)
+- Single file: `index.html` contains markup, styles, interactions, QR generator (inlined minimal QR code implementation).
+- Scenes are sections toggled with a simple `goTo(sceneId)` function and CSS `.active` class.
+- Input handling:
+  - Tap: `click` + `touchend` for buds and cocoons.
+  - Drag: pointer events for the watering can; non-blocking and touch-friendly.
+- Performance:
+  - No external libraries; small DOM; CSS transitions; minimal layout thrash.
+  - Prefer `pointer-events: none` on decorative elements to keep interactions reliable.
+
+### Configuration (Edit inside `index.html`)
+- At the top of the script, adjust:
+  - `SETTINGS.giftLink` — URL for the gift card QR code.
+  - `SETTINGS.finalMessage` — final scene title text (editable message).
+  - `SETTINGS.personalNote` — optional extra message line under the title.
+
+### Accessibility and Mobile Considerations
+- First user tap starts audio (mobile policy).
+- Buttons are large, high-contrast, with bounce feedback.
+- Instruction bubbles are dismissible and kept outside the play area.
+
+### Assets and Art
+- Bella the Bee is an inline SVG with clear bee features (round body, horizontal stripes, wings, small legs, stinger) styled to match the pastel theme.
+- Background includes animated clouds and decorative ground elements (grass tufts, mushrooms, rocks, tiny flowers) generated at runtime for variety.
+
+### Success Criteria (from initial prompt)
+- 3–5 minute playtime on iPhone Safari.
+- Cute, pastel, birthday theme with kawaii Bella.
+- Smooth, delightful micro-animations and sound effects.
+- Lightweight, fast-loading, single-page app with no dependencies.
+- Dynamic QR code at the end, link configurable in code.
+- Final message text easily editable in code.
+
+### Hand-off Notes for Agents
+- Keep edits minimal and focused; adhere to DRY/KISS/YAGNI.
+- Preserve the single-file structure and avoid heavy libraries.
+- Respect mobile-first, touch-friendly behaviors.
+- If adding features, ensure they do not obstruct gameplay and maintain smooth performance on iPhone Safari.
+
+
