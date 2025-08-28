@@ -4,270 +4,24 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no'>
 	<title>Marija's Birthday Garden</title>
-	<style>
-		:root {
-			--accent: #f8a8c8; /* pastel pink */
-			--pink: #f8a8c8;
-			--pink-strong: #f48fb1;
-			--yellow: #ffe8a1; /* soft yellow */
-			--mint: #bff4e3; /* mint */
-			--lilac: #d9c6f7; /* lilac */
-			--ink: #534f59;
-			--white: #ffffff;
-		}
-
-		* { box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0); }
-		html, body { height: 100%; }
-		body {
-			margin: 0;
-			font-family: -apple-system, system-ui, 'SF Pro Rounded', 'Avenir Next', 'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
-			color: var(--ink);
-			background: linear-gradient(180deg, #fff7fb 0%, #f6fdff 45%, #eafffb 70%, #e7ffe9 100%);
-			overflow: hidden;
-			-webkit-user-select: none; user-select: none;
-		}
-
-		#app {
-			position: relative;
-			width: 100%;
-			height: 100vh; /* fallback */
-			height: 100svh; /* iOS 16+ */
-			height: 100dvh; /* modern */
-		}
-
-		.scene {
-			position: absolute; inset: 0;
-			display: grid;
-			grid-template-rows: 1fr auto;
-			align-items: center;
-			justify-items: center;
-			opacity: 0;
-			pointer-events: none;
-			transition: opacity 300ms ease;
-		}
-		.scene.active { opacity: 1; pointer-events: auto; }
-
-		.sky {
-			position: absolute; inset: 0; z-index: 0;
-			background: radial-gradient(ellipse at 50% 20%, rgba(255,240,200,0.7) 0%, rgba(255,240,200,0.0) 45%),
-				linear-gradient(180deg, #fff7fb 0%, #f6fdff 45%, #eafffb 70%, #e7ffe9 100%);
-		}
-		.meadow {
-			position: absolute; left: 0; right: 0; bottom: -5vh; height: 40vh; z-index: 0;
-			background: linear-gradient(180deg, #e7ffe9 0%, #caffd2 60%, #b7f7c4 100%);
-			border-top-left-radius: 35% 20%;
-			border-top-right-radius: 35% 20%;
-			box-shadow: 0 -12px 30px rgba(0,0,0,0.05) inset;
-		}
-		.meadow::before {
-			content: '';
-			position: absolute; inset: 0;
-			background-image: 
-				radial-gradient(circle at 20% 85%, rgba(180,220,160,0.4) 0px, transparent 8px),
-				radial-gradient(circle at 40% 90%, rgba(160,200,140,0.4) 0px, transparent 6px),
-				radial-gradient(circle at 60% 88%, rgba(190,230,170,0.4) 0px, transparent 7px),
-				radial-gradient(circle at 80% 92%, rgba(170,210,150,0.4) 0px, transparent 5px);
-		}
-
-		/* Ground decor */
-		.ground-decor { position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; z-index: 1; pointer-events: none; }
-		.tuft { position: absolute; width: 20px; height: 24px; background: radial-gradient(ellipse at 50% 0%, #9be7a2, #66d08a); border-radius: 50% 50% 10% 10% / 60% 60% 40% 40%; box-shadow: 0 4px 0 rgba(0,0,0,0.05) inset; transform-origin: 50% 100%; animation: sway 3.2s ease-in-out infinite; }
-		.tuft::before, .tuft::after { content: ''; position: absolute; bottom: 0; width: 16px; height: 20px; background: inherit; border-radius: inherit; }
-		.tuft::before { left: -12px; animation: sway 3.2s ease-in-out infinite reverse; }
-		.tuft::after { right: -12px; }
-		@keyframes sway { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(3deg); } }
-
-		.mushroom { position: absolute; width: 22px; height: 14px; background: var(--pink); border-radius: 50px 50px 8px 8px; box-shadow: 0 2px 0 rgba(0,0,0,0.05) inset; }
-		.mushroom::after { content: ''; position: absolute; left: 9px; bottom: -10px; width: 4px; height: 12px; background: #ffe8f0; border-radius: 2px; }
-
-		.rock { position: absolute; width: 28px; height: 18px; background: #c9e4dc; border-radius: 40px; box-shadow: 0 2px 0 rgba(0,0,0,0.06) inset; }
-
-		.mini-flower { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 3px var(--lilac) inset; }
-
-		.clouds {
-			position: absolute; inset: 0; z-index: 0; overflow: hidden;
-		}
-		.cloud {
-			position: absolute; background: rgba(255,255,255,0.6); border-radius: 50px;
-			animation: float 20s ease-in-out infinite;
-		}
-		.cloud::before, .cloud::after {
-			content: ''; position: absolute; background: rgba(255,255,255,0.6); border-radius: 50px;
-		}
-		@keyframes float { 0%,100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(20px) translateY(-10px); } }
-
-		.hud {
-			z-index: 5; padding: 16px; text-align: center; width: 100%;
-		}
-
-		.dialog {
-			background: rgba(255,255,255,0.8);
-			backdrop-filter: blur(6px);
-			border: 2px solid var(--pink);
-			border-radius: 16px;
-			padding: 12px 16px;
-			max-width: 90vw; line-height: 1.3; font-weight: 600; font-size: 16px;
-			box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-		}
-
-		.btn {
-			appearance: none; border: none; outline: none;
-			background: var(--accent);
-			color: #5a2c3a;
-			padding: 12px 20px; border-radius: 999px;
-			font-weight: 700; font-size: 16px; letter-spacing: 0.2px;
-			box-shadow: 0 8px 16px rgba(248, 168, 200, 0.45), 0 0 0 2px rgba(255,255,255,0.6) inset;
-			transform: translateZ(0);
-			transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
-			cursor: pointer; touch-action: manipulation;
-		}
-		.btn:active { transform: scale(0.98); filter: brightness(0.98); }
-
-		.bee-wrap {
-			position: absolute; z-index: 3; left: 50%; top: 36%; transform: translate(-50%, -50%);
-		}
-		.bee {
-			width: 120px; height: 120px;
-			animation: bee-bob 2.3s ease-in-out infinite;
-			filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12));
-		}
-		@keyframes bee-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
-		/* Intro fly-in */
-		.bee-fly-in { animation: bee-in 1200ms cubic-bezier(.17,.67,.24,1.04) 1 both; }
-		@keyframes bee-in {
-			0% { transform: translate(-150%, -60%) scale(0.6) rotate(-10deg); opacity: 0; }
-			60% { transform: translate(-50%, -52%) scale(1.05) rotate(4deg); opacity: 1; }
-			100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-		}
-
-		/* Bee speech bubble (intro only) */
-		.bee-bubble { position: absolute; z-index: 4; left: 50%; top: 36%; transform: translate(calc(-50% + 88px), calc(-50% - 72px)); pointer-events: auto; }
-		.bee-bubble .dialog { position: relative; }
-		.bee-bubble .dialog::after { content: ''; position: absolute; left: -8px; bottom: 16px; width: 16px; height: 16px; background: rgba(255,255,255,0.8); border-left: 2px solid var(--pink); border-bottom: 2px solid var(--pink); transform: rotate(45deg); }
-
-		.speech {
-			position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-			pointer-events: none; padding: 12px;
-			background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 100%);
-			backdrop-filter: blur(8px);
-			border-bottom: 1px solid rgba(248,168,200,0.3);
-		}
-		.speech.hidden { transform: translateY(-100%); transition: transform 300ms ease; }
-		.speech .dialog {
-			pointer-events: auto; position: relative; margin: 0 auto; max-width: 500px;
-		}
-		.close-speech {
-			position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
-			background: rgba(248,168,200,0.8); border: none; border-radius: 50%;
-			color: #5a2c3a; font-weight: bold; font-size: 14px; line-height: 1;
-			cursor: pointer; display: flex; align-items: center; justify-content: center;
-		}
-		.close-speech:hover { background: rgba(248,168,200,1); }
-
-		.grid {
-			position: relative; z-index: 2;
-			width: min(560px, 92vw);
-			margin-bottom: 12vh;
-			min-height: 40vh;
-			display: grid; place-items: center;
-		}
-
-		.flowers-area, .watering-area, .butterfly-area, .grand-area { position: relative; width: 100%; height: 100%; }
-
-		.flower { position: absolute; width: 64px; height: 64px; transform: translate(-50%, -50%) scale(0.8); transition: transform 300ms ease; cursor: pointer; touch-action: manipulation; }
-		.flower.bud { filter: grayscale(0.8) brightness(0.9); opacity: 0.9; }
-		.flower.bloom { transform: translate(-50%, -50%) scale(1); filter: none; cursor: default; }
-
-		.sparkle { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle, #fff, rgba(255,255,255,0) 60%); pointer-events: none; animation: sparkle 700ms ease-out forwards; }
-		@keyframes sparkle { from { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; } to { transform: translate(-50%, -80%) scale(1.4); opacity: 0; } }
-
-		.watering-can { position: absolute; width: 110px; height: 110px; touch-action: none; z-index: 10; transform: translate(-50%, -50%); }
-		.pour-stream { position: absolute; left: 68%; top: 70%; width: 4px; height: 0; background: linear-gradient(180deg, rgba(180,220,255,0.0) 0%, rgba(180,220,255,0.8) 60%, rgba(160,210,255,0.0) 100%); border-radius: 2px; transform-origin: top; pointer-events: none; transition: height 80ms ease; }
-
-		.soil { position: absolute; width: 90px; height: 30px; background: #d2b48c; border-radius: 50px; box-shadow: inset 0 6px 10px rgba(0,0,0,0.1); transform: translate(-50%, -50%); }
-		.soil.dry { filter: saturate(0.8) brightness(1); }
-		.soil.wet { filter: saturate(1.2) brightness(0.95); }
-
-		.cocoon { position: absolute; width: 40px; height: 60px; background: linear-gradient(180deg, #eaddff, #cbb7ff); border: 2px solid #b79ef5; border-radius: 22px; transform: translate(-50%, -50%); box-shadow: inset 0 6px 10px rgba(0,0,0,0.08); cursor: pointer; touch-action: manipulation; }
-		.butterfly { position: absolute; width: 36px; height: 28px; transform: translate(-50%, -50%); }
-		.butterfly .wing { position: absolute; width: 50%; height: 100%; background: radial-gradient(circle at 60% 40%, var(--lilac), var(--pink)); border-radius: 50% 60% 60% 50% / 60% 60% 40% 40%; transform-origin: 0% 50%; }
-		.butterfly .wing.right { left: 50%; transform-origin: 100% 50%; border-radius: 60% 50% 50% 60% / 60% 40% 60% 60%; }
-		.butterfly .body { position: absolute; left: 50%; top: 10%; width: 6px; height: 80%; background: #5d4d7a; border-radius: 4px; transform: translateX(-50%); }
-		.butterfly.fly { animation: flutter 1800ms ease-in-out infinite; }
-		@keyframes flutter { 0% { transform: translate(-50%, -50%) translate(0,0) rotate(-3deg); } 50% { transform: translate(-50%, -50%) translate(var(--dx, 30px), var(--dy, -20px)) rotate(4deg); } 100% { transform: translate(-50%, -50%) translate(0,0) rotate(-3deg); } }
-		.butterfly .wing.left { animation: flap 280ms ease-in-out infinite; }
-		.butterfly .wing.right { animation: flap 280ms ease-in-out infinite reverse; }
-		@keyframes flap { 0%,100% { transform: rotateY(0deg); } 50% { transform: rotateY(50deg); } }
-
-		.confetti { position: absolute; top: -10vh; width: 8px; height: 12px; opacity: 0.9; transform: translateY(-20vh) rotate(0deg); animation: fall linear forwards; }
-		@keyframes fall { to { transform: translateY(120vh) rotate(720deg); } }
-
-		.qr-card { position: relative; z-index: 6; background: rgba(255,255,255,0.9); border: 2px solid var(--pink); border-radius: 16px; padding: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.08); text-align: center; }
-		.qr-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
-
-		.credits { position: absolute; bottom: 8px; width: 100%; text-align: center; font-size: 12px; opacity: 0.6; }
-
-		@media (prefers-reduced-motion: reduce) {
-			* { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-		}
-	</style>
+	<link rel='stylesheet' href='style.css'>
 </head>
 <body>
 	<div id='app'>
-		<div class='sky'></div>
-		<div class='clouds'>
-			<div class='cloud' style='width:80px;height:40px;top:15%;left:10%;animation-delay:-3s;'>
-				<div style='position:absolute;width:40px;height:40px;top:-20px;left:10px;background:rgba(255,255,255,0.6);border-radius:50px;'></div>
-				<div style='position:absolute;width:50px;height:50px;top:-25px;right:15px;background:rgba(255,255,255,0.6);border-radius:50px;'></div>
-			</div>
-			<div class='cloud' style='width:60px;height:30px;top:25%;right:15%;animation-delay:-8s;'>
-				<div style='position:absolute;width:30px;height:30px;top:-15px;left:5px;background:rgba(255,255,255,0.6);border-radius:50px;'></div>
-				<div style='position:absolute;width:40px;height:40px;top:-20px;right:10px;background:rgba(255,255,255,0.6);border-radius:50px;'></div>
-			</div>
-		</div>
-		<div class='meadow'></div>
-		<div class='ground-decor' id='ground-decor'></div>
 
 		<!-- Intro -->
 		<section id='scene-intro' class='scene active' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip1'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip1)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bee1.svg' alt='Bella the Bee' aria-label='Bella the Bee'>
 				</div>
-				<div class='bee-bubble' id='intro-bubble' style='display:none;'>
-					<div class='dialog'>Hi Marija! I'm Bella the Birthday Bee. Today is YOUR birthday! But oh no… the garden hasn't bloomed yet. Without your magic, the flowers won't wake up. Will you help me?<button class='close-speech' onclick='this.parentElement.parentElement.style.display="none"'>×</button></div>
+				<div class='bee-speech-bubble' id='intro-bubble'>
+					<div class='dialog'>Hi Marija! I'm Bella the Birthday Bee. Today is YOUR birthday! But oh no… the garden hasn't bloomed yet. Without your magic, the flowers won't wake up. Will you help me?</div>
 				</div>
+				<div class='flowers-area'></div>
 			</div>
 			<div class='hud'>
-				<button class='btn' id='btn-start' aria-label='Start helping'>Yes, I'll help!</button>
+				<button class='btn visible' id='btn-start' aria-label='Start helping'>Yes, I'll help!</button>
 			</div>
 		</section>
 
@@ -275,567 +29,60 @@
 		<section id='scene-flowers' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing2' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip2'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip2)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing2)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing2)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bee1.svg' alt='Bella the Bee' aria-label='Bella the Bee'>
 				</div>
 				<div class='flowers-area' id='flowers-area'></div>
-				<div class='speech'><div class='dialog' id='flowers-text'>Tap the sleepy buds to wake the flowers!<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
+				<div class='bee-speech-bubble' style='display: none;'><div class='dialog' id='flowers-text'>Tap the sleepy buds to wake the flowers!</div></div>
 			</div>
-			<div class='hud'><button class='btn' id='btn-flowers-next' style='display:none'>Next</button></div>
+			<div class='hud'><button class='btn' id='btn-flowers-next'>Next</button></div>
 		</section>
 
 		<!-- Watering -->
 		<section id='scene-watering' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing3' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip3'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip3)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing3)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing3)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bee1.svg' alt='Bella the Bee' aria-label='Bella the Bee'>
 				</div>
 				<div class='watering-area' id='watering-area'></div>
-				<div class='speech'><div class='dialog' id='watering-text'>Drag the watering can over the dry soil.<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
+				<div class='bee-speech-bubble' style='display: none;'><div class='dialog' id='watering-text'>Drag the watering can over the dry soil.</div></div>
 			</div>
-			<div class='hud'><button class='btn' id='btn-watering-next' style='display:none'>Next</button></div>
+			<div class='hud'><button class='btn' id='btn-watering-next'>Next</button></div>
 		</section>
 
 		<!-- Butterflies -->
 		<section id='scene-butterflies' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing4' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<rect x='32' y='50' width='76' height='40' fill='none' stroke='#5a3b2e' stroke-width='3'/>
-							<rect x='38' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='60' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='82' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='104' y='52' width='4' height='36' fill='#5a3b2e' rx='2'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing4)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing4)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bee1.svg' alt='Bella the Bee' aria-label='Bella the Bee'>
 				</div>
 				<div class='butterfly-area' id='butterfly-area'></div>
-				<div class='speech'><div class='dialog' id='butterfly-text'>Tap the cocoons to let the butterflies out!<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
+				<div class='bee-speech-bubble' style='display: none;'><div class='dialog' id='butterfly-text'>Tap the cocoons to let the butterflies out!</div></div>
 			</div>
-			<div class='hud'><button class='btn' id='btn-butterfly-next' style='display:none'>Next</button></div>
+			<div class='hud'><button class='btn' id='btn-butterfly-next'>Next</button></div>
 		</section>
 
 		<!-- Grand Bloom & QR -->
 		<section id='scene-grand' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing5' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip5'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip5)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing5)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing5)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bee1.svg' alt='Bella the Bee' aria-label='Bella the Bee'>
 				</div>
 				<div class='grand-area' id='grand-area'></div>
-				<div class='speech'><div class='dialog' id='grand-text'>You did it, Marija! The garden is alive, just like your bright spirit. The flowers and I have a special gift for you…<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
+				<div class='bee-speech-bubble' style='display: none;'><div class='dialog' id='grand-text'>You did it, Marija! The garden is alive, just like your bright spirit. The flowers and I have a special gift for you…</div></div>
 			</div>
 			<div class='hud'>
-				<div class='qr-card' id='qr-card' style='display:none'>
+				<div class='qr-card' id='qr-card' style='visibility:hidden;opacity:0;transition:visibility 0ms, opacity 300ms ease'>
 					<div class='qr-title' id='qr-title'>Happy Birthday, Marija! 🌸🐝 May your day be as beautiful as this garden.</div>
 					<div id='qr'></div>
 					<div style='height:8px'></div>
-					<button class='btn' id='btn-open-link'>Scan your surprise!</button>
+					<button class='btn visible' id='btn-open-link'>Open your gift</button>
 				</div>
 			</div>
 		</section>
 
 		<div class='credits' id='credits'></div>
 	</div>
-
-	<script>
-	'use strict';
-
-	// Editable settings
-	const SETTINGS = {
-		giftLink: 'https://example.com/your-gift-card',
-		finalMessage: 'Happy Birthday, Marija! 🌸🐝 May your day be as beautiful as this garden.',
-		personalNote: '', // Optional extra line below the title
-	};
-
-	// Utility
-	/** @param {Element} el */
-	function safeShow(el) { el.style.display = ''; }
-	/** @param {Element} el */
-	function safeHide(el) { el.style.display = 'none'; }
-	/** @param {Element} el */
-	function bounce(el) { el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], { duration: 250, easing: 'ease-out' }); }
-	/** @param {DOMRect} a @param {DOMRect} b */
-	function rectsOverlap(a, b) { return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom); }
-
-	// Scene control
-	const scenes = ['scene-intro', 'scene-flowers', 'scene-watering', 'scene-butterflies', 'scene-grand'];
-	let currentScene = 'scene-intro';
-	function goTo(sceneId) {
-		scenes.forEach(function(id) { document.getElementById(id).classList.remove('active'); });
-		document.getElementById(sceneId).classList.add('active');
-		currentScene = sceneId;
-	}
-
-	// Audio system
-	class AudioManager {
-		constructor() {
-			this.context = null;
-			this.masterGain = null;
-			this.noiseNode = null;
-			this.pouring = false;
-			this.bgInterval = null;
-		}
-		init() {
-			if (this.context) return;
-			const AudioCtx = window.AudioContext || window.webkitAudioContext;
-			this.context = new AudioCtx({ latencyHint: 'interactive' });
-			this.masterGain = this.context.createGain();
-			this.masterGain.gain.value = 0.15;
-			this.masterGain.connect(this.context.destination);
-		}
-		resume() { if (this.context && this.context.state !== 'running') { this.context.resume(); } }
-		playChime() {
-			if (!this.context) return;
-			const now = this.context.currentTime;
-			const o1 = this.context.createOscillator();
-			const g1 = this.context.createGain();
-			o1.type = 'sine'; o1.frequency.setValueAtTime(650, now);
-			g1.gain.setValueAtTime(0.0001, now);
-			g1.gain.exponentialRampToValueAtTime(0.4, now + 0.01);
-			g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-			o1.connect(g1).connect(this.masterGain);
-			o1.start(now);
-			o1.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
-			o1.stop(now + 0.4);
-		}
-		playBloom() {
-			if (!this.context) return;
-			const now = this.context.currentTime;
-			const osc = this.context.createOscillator();
-			const gain = this.context.createGain();
-			osc.type = 'triangle'; osc.frequency.setValueAtTime(520, now);
-			gain.gain.setValueAtTime(0.0001, now);
-			gain.gain.exponentialRampToValueAtTime(0.35, now + 0.02);
-			gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
-			osc.connect(gain).connect(this.masterGain);
-			osc.frequency.exponentialRampToValueAtTime(1100, now + 0.18);
-			osc.start(now); osc.stop(now + 0.32);
-		}
-		startPour() {
-			if (!this.context || this.pouring) return; this.pouring = true;
-			const bufferSize = 2 * this.context.sampleRate;
-			const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
-			const output = noiseBuffer.getChannelData(0);
-			for (let i = 0; i < bufferSize; i++) { output[i] = (Math.random() * 2 - 1) * 0.4; }
-			const noise = this.context.createBufferSource(); noise.buffer = noiseBuffer; noise.loop = true;
-			const bp = this.context.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 800; bp.Q.value = 0.8;
-			const g = this.context.createGain(); g.gain.value = 0.08;
-			noise.connect(bp).connect(g).connect(this.masterGain); noise.start();
-			this.noiseNode = noise;
-		}
-		stopPour() { if (this.noiseNode) { try { this.noiseNode.stop(); } catch(e){} this.noiseNode.disconnect(); this.noiseNode = null; } this.pouring = false; }
-		playFlutter() {
-			if (!this.context) return;
-			const now = this.context.currentTime;
-			const osc = this.context.createOscillator(); const g = this.context.createGain();
-			osc.type = 'sine'; osc.frequency.setValueAtTime(40, now);
-			const trem = this.context.createOscillator(); const tremGain = this.context.createGain();
-			trem.type = 'sine'; trem.frequency.value = 14; tremGain.gain.value = 40; trem.connect(tremGain).connect(osc.frequency);
-			g.gain.value = 0.12;
-			osc.connect(g).connect(this.masterGain);
-			osc.start(now); trem.start(now);
-			osc.stop(now + 0.25); trem.stop(now + 0.25);
-		}
-		playFanfare() {
-			if (!this.context) return;
-			const now = this.context.currentTime;
-			const notes = [660, 880, 990];
-			notes.forEach(function(freq, i) {
-				const o = audio.context.createOscillator(); const g = audio.context.createGain();
-				o.type = 'triangle'; o.frequency.value = freq;
-				g.gain.setValueAtTime(0.0001, now + i * 0.04);
-				g.gain.exponentialRampToValueAtTime(0.2, now + i * 0.04 + 0.02);
-				g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.04 + 0.5);
-				o.connect(g).connect(audio.masterGain); o.start(now + i * 0.04); o.stop(now + i * 0.7);
-			});
-		}
-		startBackground() {
-			if (!this.context || this.bgInterval) return;
-			const playTick = () => {
-				if (!this.context) return;
-				const now = this.context.currentTime;
-				const o = this.context.createOscillator(); const g = this.context.createGain();
-				o.type = 'sine'; o.frequency.value = 540 + Math.random() * 40;
-				g.gain.setValueAtTime(0.0001, now);
-				g.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
-				g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-				o.connect(g).connect(this.masterGain); o.start(now); o.stop(now + 0.24);
-			};
-			this.bgInterval = setInterval(playTick, 1200);
-		}
-		stopBackground() { if (this.bgInterval) { clearInterval(this.bgInterval); this.bgInterval = null; } }
-	}
-
-	const audio = new AudioManager();
-
-	// Initialize
-	document.addEventListener('DOMContentLoaded', function() {
-		// Intro
-		function startGame() {
-			console.log('Start button clicked!');
-			audio.init(); audio.resume(); audio.playChime(); audio.startBackground();
-			goTo('scene-flowers');
-			setupFlowers();
-		}
-		document.getElementById('btn-start').addEventListener('click', startGame);
-		document.getElementById('btn-start').addEventListener('touchend', function(e) { e.preventDefault(); startGame(); });
-
-		// Next buttons
-		document.getElementById('btn-flowers-next').addEventListener('click', function() {
-			audio.playChime();
-			goTo('scene-watering');
-			setupWatering();
-		});
-		document.getElementById('btn-watering-next').addEventListener('click', function() {
-			audio.playChime();
-			goTo('scene-butterflies');
-			setupButterflies();
-		});
-		document.getElementById('btn-butterfly-next').addEventListener('click', function() {
-			audio.playChime();
-			goTo('scene-grand');
-			setupGrand();
-		});
-
-		// Final button opens link
-		document.getElementById('btn-open-link').addEventListener('click', function() {
-			window.open(SETTINGS.giftLink, '_blank');
-		});
-
-		// Set editable message
-		document.getElementById('qr-title').textContent = SETTINGS.finalMessage;
-		if (SETTINGS.personalNote) {
-			const note = document.createElement('div');
-			note.textContent = SETTINGS.personalNote;
-			note.style.marginTop = '4px';
-			note.style.fontSize = '14px';
-			note.style.opacity = '0.8';
-			document.getElementById('qr-card').insertBefore(note, document.getElementById('qr'));
-		}
-
-		// Credits
-		// document.getElementById('credits').textContent = 'Marija's Birthday Garden • Bella the Bee';
-		
-		// Add click to show speech again if hidden
-		document.addEventListener('keydown', function(e) {
-			if (e.key === 'h' || e.key === 'H') {
-				document.querySelectorAll('.speech.hidden').forEach(function(speech) {
-					speech.classList.remove('hidden');
-				});
-			}
-		});
-
-		// Intro bee fly-in & bubble
-		const beeIntro = document.querySelector('#scene-intro .bee');
-		if (beeIntro) {
-			beeIntro.classList.add('bee-fly-in');
-			setTimeout(function() { const b = document.getElementById('intro-bubble'); if (b) { safeShow(b); bounce(b.querySelector('.dialog')); } }, 1200);
-		}
-
-		// Ground decorations
-		setupGroundDecor();
-	});
-
-	function setupGroundDecor() {
-		const container = document.getElementById('ground-decor'); if (!container) return; container.innerHTML = '';
-		const width = container.clientWidth || window.innerWidth;
-		function place(el, leftPct, bottomPx) { el.style.left = leftPct + '%'; el.style.bottom = bottomPx + 'px'; container.appendChild(el); }
-		for (let i = 0; i < 14; i++) {
-			const t = document.createElement('div'); t.className = 'tuft';
-			place(t, 5 + Math.random() * 90, 20 + Math.random() * 30);
-		}
-		for (let i = 0; i < 5; i++) {
-			const m = document.createElement('div'); m.className = 'mushroom';
-			place(m, 10 + Math.random() * 80, 18 + Math.random() * 12);
-		}
-		for (let i = 0; i < 6; i++) { const r = document.createElement('div'); r.className = 'rock'; place(r, 6 + Math.random() * 88, 14 + Math.random() * 10); }
-		for (let i = 0; i < 10; i++) { const f = document.createElement('div'); f.className = 'mini-flower'; place(f, 8 + Math.random() * 84, 24 + Math.random() * 20); }
-	}
-
-	// Flowers scene
-	function setupFlowers() {
-		const container = document.getElementById('flowers-area');
-		container.innerHTML = '';
-		const positions = [
-			[18, 75], [34, 82], [52, 78], [68, 85], [82, 75], [26, 88], [50, 90], [74, 85]
-		];
-		let bloomed = 0; const total = positions.length;
-		positions.forEach(function(pos) {
-			const node = createFlower({ xPercent: pos[0], yPercent: pos[1], asBud: true });
-			container.appendChild(node);
-			function handleFlowerTap() {
-				if (node.classList.contains('bloom')) return;
-				node.classList.remove('bud'); node.classList.add('bloom');
-				spawnSparkles(node.offsetLeft, node.offsetTop);
-				audio.playBloom();
-				bloomed += 1;
-				console.log('Flower bloomed! Count:', bloomed, 'of', total);
-				if (bloomed === total) {
-					console.log('All flowers bloomed! Showing next button.');
-					document.getElementById('flowers-text').textContent = 'Wow, the first flowers are awake! You are amazing, Marija!';
-					const nextBtn = document.getElementById('btn-flowers-next');
-					console.log('Next button element:', nextBtn);
-					if (nextBtn) {
-						safeShow(nextBtn); 
-						bounce(nextBtn);
-					} else {
-						console.error('btn-flowers-next not found!');
-					}
-				}
-			}
-			node.addEventListener('click', handleFlowerTap);
-			node.addEventListener('touchend', function(e) { e.preventDefault(); handleFlowerTap(); });
-		});
-	}
-
-	function createFlower(opts) {
-		const x = opts.xPercent; const y = opts.yPercent; const asBud = !!opts.asBud;
-		const wrap = document.createElement('div'); wrap.className = 'flower ' + (asBud ? 'bud' : 'bloom'); wrap.style.left = x + '%'; wrap.style.top = y + '%';
-		wrap.innerHTML = getFlowerSVG();
-		return wrap;
-	}
-
-	function getFlowerSVG() {
-		return "<svg viewBox='0 0 64 64' width='64' height='64' aria-hidden='true'>" +
-			"<defs><radialGradient id='petal' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='#fff'/><stop offset='100%' stop-color='var(--pink)'/></radialGradient></defs>" +
-			"<g>" +
-				"<circle cx='32' cy='12' r='10' fill='var(--pink)'/>" +
-				"<circle cx='52' cy='26' r='10' fill='var(--lilac)'/>" +
-				"<circle cx='42' cy='48' r='10' fill='var(--mint)'/>" +
-				"<circle cx='22' cy='48' r='10' fill='var(--yellow)'/>" +
-				"<circle cx='12' cy='26' r='10' fill='var(--lilac)'/>" +
-				"<circle cx='32' cy='32' r='10' fill='#ffd166' stroke='#a86b00' stroke-width='2'/>" +
-			"</g></svg>";
-	}
-
-	function spawnSparkles(left, top) {
-		const parent = document.querySelector('.scene.active');
-		for (let i = 0; i < 6; i++) {
-			const s = document.createElement('div'); s.className = 'sparkle';
-			s.style.left = left + (Math.random() * 40 - 20) + 'px';
-			s.style.top = top + (Math.random() * 40 - 20) + 'px';
-			parent.appendChild(s);
-			setTimeout(function() { s.remove(); }, 720);
-		}
-	}
-
-	// Watering scene
-	function setupWatering() {
-		const area = document.getElementById('watering-area'); area.innerHTML = '';
-		const soilPositions = [[22, 70],[50, 72],[78, 68]];
-		const soils = soilPositions.map(function(p) { const d = document.createElement('div'); d.className = 'soil dry'; d.style.left = p[0] + '%'; d.style.top = p[1] + '%'; area.appendChild(d); return d; });
-
-		const can = document.createElement('div'); can.className = 'watering-can'; can.style.left = '15%'; can.style.top = '45%';
-		can.innerHTML = getCanSVG() + "<div class='pour-stream' id='pour-stream'></div>";
-		area.appendChild(can);
-
-		let watering = false; let wateredCount = 0;
-		const stream = can.querySelector('#pour-stream');
-
-		function onPointerDown(ev) { watering = true; can.setPointerCapture(ev.pointerId); stream.style.height = '36px'; audio.startPour(); }
-		function onPointerMove(ev) {
-			if (!watering) return;
-			const rect = area.getBoundingClientRect(); const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
-			can.style.left = (x / rect.width * 100) + '%'; can.style.top = (y / rect.height * 100) + '%';
-			soils.forEach(function(s) {
-				if (s.classList.contains('wet')) return;
-				if (rectsOverlap(can.getBoundingClientRect(), s.getBoundingClientRect())) {
-					s.classList.remove('dry'); s.classList.add('wet'); wateredCount += 1;
-					const flower = createFlower({ xPercent: parseFloat(s.style.left), yPercent: parseFloat(s.style.top) - 6, asBud: false });
-					area.appendChild(flower); spawnSparkles(s.offsetLeft, s.offsetTop); audio.playBloom();
-					if (wateredCount === soils.length) { document.getElementById('watering-text').textContent = 'So colorful! The garden is starting to celebrate you!'; safeShow(document.getElementById('btn-watering-next')); bounce(document.getElementById('btn-watering-next')); }
-				}
-			});
-		}
-		function onPointerUp() { watering = false; stream.style.height = '0px'; audio.stopPour(); }
-
-		can.addEventListener('pointerdown', onPointerDown); can.addEventListener('pointermove', onPointerMove); can.addEventListener('pointerup', onPointerUp); can.addEventListener('pointercancel', onPointerUp); can.addEventListener('lostpointercapture', onPointerUp);
-	}
-
-	function getCanSVG() {
-		return "<svg viewBox='0 0 160 160' width='110' height='110' aria-hidden='true'>" +
-			"<g fill='none' stroke='#8a6fa5' stroke-width='4'>" +
-				"<rect x='40' y='50' width='70' height='50' rx='10' fill='var(--lilac)'/>" +
-				"<path d='M110 60 L145 45'/>" +
-				"<circle cx='148' cy='44' r='8' fill='var(--mint)'/>" +
-				"<path d='M48 50 q-20 0 -26 20 q6 20 26 20' fill='none'/>" +
-			"</g></svg>";
-	}
-
-	// Butterflies scene
-	function setupButterflies() {
-		const area = document.getElementById('butterfly-area'); area.innerHTML = '';
-		const cocoons = [[24, 60],[42, 68],[60, 56],[74, 64],[30, 78],[68, 78]];
-		let freed = 0; const total = cocoons.length;
-		cocoons.forEach(function(p) {
-			const c = document.createElement('div'); c.className = 'cocoon'; c.style.left = p[0] + '%'; c.style.top = p[1] + '%'; area.appendChild(c);
-			function handleCocoonTap() {
-				if (!c.parentNode) return;
-				c.remove();
-				const b = createButterfly({ xPercent: p[0], yPercent: p[1] }); area.appendChild(b); audio.playFlutter();
-				freed += 1;
-				if (freed === total) { document.getElementById('butterfly-text').textContent = 'Now the butterflies can join your birthday party!'; safeShow(document.getElementById('btn-butterfly-next')); bounce(document.getElementById('btn-butterfly-next')); }
-			}
-			c.addEventListener('click', handleCocoonTap);
-			c.addEventListener('touchend', function(e) { e.preventDefault(); handleCocoonTap(); });
-		});
-	}
-
-	function createButterfly(opts) {
-		const x = opts.xPercent; const y = opts.yPercent; const b = document.createElement('div'); b.className = 'butterfly fly'; b.style.left = x + '%'; b.style.top = y + '%';
-		b.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
-		b.style.setProperty('--dy', (Math.random() * -30 - 10) + 'px');
-		b.innerHTML = "<div class='wing left'></div><div class='wing right'></div><div class='body'></div>";
-		return b;
-	}
-
-	// Grand scene
-	function setupGrand() {
-		const area = document.getElementById('grand-area'); area.innerHTML = '';
-		// Populate lots of flowers and butterflies
-		for (let i = 0; i < 12; i++) {
-			const fx = 10 + Math.random() * 80; const fy = 40 + Math.random() * 40;
-			area.appendChild(createFlower({ xPercent: fx, yPercent: fy, asBud: false }));
-		}
-		for (let i = 0; i < 6; i++) {
-			const bx = 15 + Math.random() * 70; const by = 35 + Math.random() * 30;
-			area.appendChild(createButterfly({ xPercent: bx, yPercent: by }));
-		}
-		launchConfetti(); audio.playFanfare();
-		setTimeout(function() { revealQR(); }, 1400);
-	}
-
-	function launchConfetti() {
-		const colors = [ 'var(--pink)', 'var(--yellow)', 'var(--mint)', 'var(--lilac)' ];
-		const scene = document.getElementById('scene-grand');
-		for (let i = 0; i < 60; i++) {
-			const c = document.createElement('div'); c.className = 'confetti';
-			c.style.left = (Math.random() * 100) + 'vw';
-			c.style.background = colors[i % colors.length];
-			c.style.animationDuration = (3 + Math.random() * 2) + 's';
-			c.style.transform = 'translateY(' + (-20 - Math.random() * 40) + 'vh) rotate(0)';
-			scene.appendChild(c);
-			setTimeout(function() { c.remove(); }, 6000);
-		}
-	}
-
-	function revealQR() {
-		const card = document.getElementById('qr-card'); safeShow(card); bounce(card);
-		generateQRCode({ elementId: 'qr', text: SETTINGS.giftLink, size: 220 });
-	}
-
-	// Minimal QR generator (qrcode.js by davidshimjs - inlined, lightly trimmed)
-	/* eslint-disable */
-	!function(o){function n(o){this.mode=s.MODE_8BIT_BYTE,this.data=o}function e(o){this.totalCount=o,this.numData=o}function t(o,n){this.typeNumber=o,this.errorCorrectLevel=n,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}var r=function(){var o=function(o){this.buffer=[],this.length=0,o>1&&(this.buffer.push(0),this.length=8)};return o.prototype={get:function(o){var n=Math.floor(o/8);return 1==(this.buffer[n]>>>7-o%8&1)},put:function(o,n){for(var e=0;e<n;e++)this.putBit(!!(1&(o>>>n-e-1)))},putBit:function(o){var n=Math.floor(this.length/8);this.buffer.length<=n&&this.buffer.push(0),o&&(this.buffer[n]|=128>>>this.length%8),this.length++}},o}(),i={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]],G15:1335,G18:7973,G15_MASK:21522,getBCHTypeInfo:function(o){for(var n=o<<10;n>=1024;)n^=i.G15<<Math.floor(Math.log(n)/Math.log(2))-Math.floor(Math.log(i.G15)/Math.log(2));return(o<<10|n)^i.G15_MASK},getBCHTypeNumber:function(o){for(var n=o<<12;n>=4096;)n^=i.G18<<Math.floor(Math.log(n)/Math.log(2))-Math.floor(Math.log(i.G18)/Math.log(2));return o<<12|n},getPatternPosition:function(o){return i.PATTERN_POSITION_TABLE[o-1]},mask:function(o,n,e){switch(e){case 0:return(n+o)%2==0;case 1:return n%2==0;case 2:return o%3==0;case 3:return(n+o)%3==0;case 4:return(Math.floor(n/2)+Math.floor(o/3))%2==0;case 5:return n*o%2+n*o%3==0;case 6:return(n*o%2+n*o%3)%2==0;case 7:return(n*o%3+(n+o)%2)%2==0;default:throw new Error('bad maskPattern:'+e)}},getErrorCorrectPolynomial:function(o){for(var n=new u([1],0),e=0;e<o;e++)n=n.multiply(new u([1,l.gexp(e)],0));return n},getLengthInBits:function(o,n){if(n>=1&&n<10)return 8;if(n<27)return 16;if(n<41)return 16;throw new Error('typeNumber:'+n)},getLostPoint:function(o){for(var n=o.getModuleCount(),e=0,t=0;t<n;t++)for(var r=0;r<n;r++){for(var l=0,u=o.isDark(t,r),f=-1;f<=1;f++)if(!(t+f<0||n<=t+f))for(var a=-1;a<=1;a++)r+a<0||n<=r+a||0==f&&0==a||u==o.isDark(t+f,r+a)&&l++;l>5&&(e+=3+l-5);var c=0;for(a=0;a<5&&r+a<n;a++)o.isDark(t,r+a)&&c++;(0==c||5==c)&&(e+=3)}for(t=0;t<n-1;t++)for(r=0;r<n-1;r++){var s=0;o.isDark(t,r)&&s++,o.isDark(t+1,r)&&s++,o.isDark(t,r+1)&&s++,o.isDark(t+1,r+1)&&s++,(0==s||4==s)&&(e+=3)}for(t=0;t<n;t++)for(r=0;r<n-6;r++)o.isDark(t,r)&&!o.isDark(t,r+1)&&o.isDark(t,r+2)&&o.isDark(t,r+3)&&o.isDark(t,r+4)&&!o.isDark(t,r+5)&&o.isDark(t,r+6)&&(e+=40);for(r=0;r<n;r++)for(t=0;t<n-6;t++)o.isDark(t,r)&&!o.isDark(t+1,r)&&o.isDark(t+2,r)&&o.isDark(t+3,r)&&o.isDark(t+4,r)&&!o.isDark(t+5,r)&&o.isDark(t+6,r)&&(e+=40);for(var h=0,d=0,g=0;t<n;t++)for(r=0;r<n;r++)g++,o.isDark(t,r)&&h++;for(d=Math.abs(100*h/g-50)/5,e+=10*d,t=0;t<e;t++);return e}},l={glog:function(o){if(o<1)throw new Error('glog('+o+')');return l.LOG_TABLE[o]},gexp:function(o){for(;o<0;)o+=255;for(;o>=256;)o-=255;return l.EXP_TABLE[o]},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)};for(var u=function(o,n){if(void 0==o.length)throw new Error(o.length+'/'+n);for(var e=0;e<o.length&&0==o[e];)e++;this.num=new Array(o.length-e+n);for(var t=0;t<o.length-e;t++)this.num[t]=o[t+e]},f=0;f<8;f++)l.EXP_TABLE[f]=1<<f;for(f=8;f<256;f++)l.EXP_TABLE[f]=l.EXP_TABLE[f-4]^l.EXP_TABLE[f-5]^l.EXP_TABLE[f-6]^l.EXP_TABLE[f-8];for(f=0;f<255;f++)l.LOG_TABLE[l.EXP_TABLE[f]]=f;u.prototype={get:function(o){return this.num[o]},getLength:function(){return this.num.length},multiply:function(o){for(var n=new Array(this.getLength()+o.getLength()-1),e=0;e<this.getLength();e++)for(var t=0;t<o.getLength();t++)n[e+t]^=l.gexp(l.glog(this.get(e))+l.glog(o.get(t)));return new u(n,0)},mod:function(o){if(this.getLength()-o.getLength()<0)return this;for(var n=l.glog(this.get(0))-l.glog(o.get(0)),e=new Array(this.getLength()),t=0;t<this.getLength();t++)e[t]=this.get(t);for(t=0;t<o.getLength();t++)e[t]^=l.gexp(l.glog(o.get(t))+n);return new u(e,0).mod(o)}};var s={PAD0:236,PAD1:17,MODE_8BIT_BYTE:4};n.prototype={getLength:function(){return this.data.length},write:function(o){for(var n=0;n<this.data.length;n++)o.put(this.data.charCodeAt(n),8)}};e.RS_BLOCK_TABLE=[[1,26,19]];var a={getRSBlocks:function(o,n){return[e.RS_BLOCK_TABLE[0].map(function(o){return new e(o)})][0]}};t.prototype={addData:function(o){this.dataList.push(new n(o)),this.dataCache=null},isDark:function(o,n){if(o<0||this.moduleCount<=o||n<0||this.moduleCount<=n)throw new Error(o+','+n);return this.modules[o][n]},getModuleCount:function(){return this.moduleCount},make:function(){this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(o,n){this.moduleCount=29,this.modules=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++){this.modules[e]=new Array(this.moduleCount);for(var t=0;t<this.moduleCount;t++)this.modules[e][t]=null}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(o,n),this.mapData(this.createData(this.typeNumber,this.errorCorrectLevel),n)},setupPositionProbePattern:function(o,n){for(var e=-1;e<=7;e++)if(!(o+e<=-1||this.moduleCount<=o+e))for(var t=-1;t<=7;t++)n+t<=-1||this.moduleCount<=n+t||(this.modules[o+e][n+t]=e>=0&&e<=6&&(0==t||6==t)||t>=0&&t<=6&&(0==e||6==e)||e>=2&&e<=4&&t>=2&&t<=4)},getBestMaskPattern:function(){for(var o=0,n=0,e=0;e<8;e++){this.makeImpl(!0,e);var t=i.getLostPoint(this);(0==e||t<o)&&(o=t,n=e)}return n},createData:function(o,n){for(var e=a.getRSBlocks(o,n),t=new r,i=0;i<this.dataList.length;i++){var l=this.dataList[i];t.put(l.mode,4),t.put(l.getLength(),i.getLengthInBits(l.mode,o)),l.write(t)}for(var u=0,f=0;f<e.length;f++)u+=e[f].numData;for(t.put(s.MODE_8BIT_BYTE,4);t.length+4<=8*u;)t.put(0,4);for(;t.length%8!=0;)t.putBit(!1);for(var c=[],h=0;t.length>h;){c.push(255&t.buffer[h>>3]),h+=8}return c},setupTimingPattern:function(){for(var o=8;o<this.moduleCount-8;o++)null==this.modules[o][6]&&(this.modules[o][6]=o%2==0),null==this.modules[6][o]&&(this.modules[6][o]=o%2==0)},setupPositionAdjustPattern:function(){for(var o=i.getPatternPosition(this.typeNumber),n=0;n<o.length;n++)for(var e=0;e<o.length;e++){var t=o[n],r=o[e];if(null==this.modules[t][r])for(var l=-2;l<=2;l++)for(var u=-2;u<=2;u++)this.modules[t+l][r+u]=l==-2||2==l||u==-2||2==u||0==l&&0==u}},setupTypeInfo:function(o,n){for(var e=i.getBCHTypeInfo(this.errorCorrectLevel<<3|n),t=0;t<15;t++){var r=!o&&1==(1&e>>t);t<6?this.modules[t][8]=r:t<8?this.modules[t+1][8]=r:this.modules[this.moduleCount-15+t][8]=r}for(t=0;t<15;t++){r=!o&&1==(1&e>>t);t<8?this.modules[8][this.moduleCount-1-t]=r:t<9?this.modules[8][15-t-1+1]=r:this.modules[8][14-t]=r}this.modules[this.moduleCount-8][8]=!o},mapData:function(o,n){for(var e=-1,t=this.moduleCount-1,r=7,l=0,u=this.moduleCount-1;u>0;u-=2)for(6==u&&u--;t>=0&&t<this.moduleCount;t+=e)for(var f=0;f<2;f++)null==this.modules[t][u-f]&&(l<o.length&&(this.modules[t][u-f]=1==(1&o[l]>>r)),r--,-1==r&&(l++,r=7));},setupTypeNumber:function(o){for(var n=i.getBCHTypeNumber(this.typeNumber),e=0;e<18;e++){var t=!o&&1==(1&n>>e);this.modules[Math.floor(e/3)][e%3+this.moduleCount-8-3]=t,this.modules[e%3+this.moduleCount-8-3][Math.floor(e/3)]=t}}};var d={stringToBytes:function(o){for(var n=[],e=0;e<o.length;e++){var t=o.charCodeAt(e);n.push(255&t)}return n}};n.prototype.write=function(o){for(var n=d.stringToBytes(this.data),e=0;e<n.length;e++)o.put(n[e],8)};var g={create:function(o){var n=new t(9,1);return n.addData(o),n.make(),n}};o.QRCode=function(o){this._el=o,this._htOption={width:256,height:256,text:'',colorDark:'#000000',colorLight:'#ffffff'},this._android=/Android/i.test(navigator.userAgent),this._el.style.position='relative',this._el.title=this._htOption.text,this.makeCode(this._htOption.text)},o.QRCode.prototype.makeCode=function(o){this._oQRCode=g.create(o),this._el.innerHTML='';for(var n=this._oQRCode.getModuleCount(),e=Math.floor(Math.min(this._htOption.width,this._htOption.height)/n),t=document.createElement('div'),r=0;r<n;r++){for(var l=document.createElement('div'),u=0;u<n;u++){var f=document.createElement('i');f.style.display='inline-block',f.style.width=e+'px',f.style.height=e+'px',f.style.background=this._oQRCode.isDark(r,u)?this._htOption.colorDark:this._htOption.colorLight,l.appendChild(f)}t.appendChild(l)}this._el.appendChild(t)},o.QRCode.prototype.clear=function(){this._el.innerHTML=''},o.QRCode.CorrectLevel={L:1,M:0,Q:3,H:2}}(window);
-	/* eslint-enable */
-
-	function generateQRCode(opts) {
-		var el = document.getElementById(opts.elementId);
-		el.innerHTML = '';
-		var q = new window.QRCode(el);
-		q._htOption.width = opts.size || 200;
-		q._htOption.height = opts.size || 200;
-		q.makeCode(opts.text);
-	}
-	</script>
+	<script src='script.js'></script>
 </body>
 </html>
 
