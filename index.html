@@ -52,6 +52,11 @@
 			background: radial-gradient(ellipse at 50% 20%, rgba(255,240,200,0.7) 0%, rgba(255,240,200,0.0) 45%),
 				linear-gradient(180deg, #fff7fb 0%, #f6fdff 45%, #eafffb 70%, #e7ffe9 100%);
 		}
+		/* Soft distant hills for depth */
+		.hills { position: absolute; left: 0; right: 0; bottom: 28vh; height: 22vh; z-index: 0; pointer-events: none; }
+		.hill { position: absolute; bottom: 0; width: 46vw; height: 26vh; border-radius: 50%; background: linear-gradient(180deg, #eafaf0, #d4f5e1); filter: blur(0.3px); box-shadow: 0 -8px 24px rgba(0,0,0,0.03) inset; animation: sway 10s ease-in-out infinite; }
+		.hill.small { width: 36vw; height: 20vh; opacity: 0.9; animation-duration: 12s; }
+		.hill.tint { background: linear-gradient(180deg, #e6f4ff, #d6f1ff); opacity: 0.7; }
 		.meadow {
 			position: absolute; left: 0; right: 0; bottom: -5vh; height: 40vh; z-index: 0;
 			background: linear-gradient(180deg, #e7ffe9 0%, #caffd2 60%, #b7f7c4 100%);
@@ -83,6 +88,20 @@
 		.rock { position: absolute; width: 28px; height: 18px; background: #c9e4dc; border-radius: 40px; box-shadow: 0 2px 0 rgba(0,0,0,0.06) inset; }
 
 		.mini-flower { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 3px var(--lilac) inset; }
+
+		/* Bushes and trees for mid/foreground depth */
+		.bush { position: absolute; width: 48px; height: 32px; background: radial-gradient(ellipse at 50% 30%, #b6f2c0, #84deb0); border-radius: 60% 60% 40% 40%; box-shadow: 0 4px 0 rgba(0,0,0,0.05) inset; transform-origin: 50% 100%; animation: sway 4.2s ease-in-out infinite; }
+		.bush::before, .bush::after { content: ''; position: absolute; bottom: 0; width: 42px; height: 28px; background: inherit; border-radius: inherit; }
+		.bush::before { left: -26px; filter: brightness(0.98); animation: sway 4.2s ease-in-out infinite reverse; }
+		.bush::after { right: -26px; filter: brightness(1.02); }
+		.bush.large { transform-origin: 50% 100%; width: 70px; height: 46px; }
+
+		.tree { position: absolute; width: 90px; height: 130px; pointer-events: none; }
+		.tree .trunk { position: absolute; bottom: 0; left: 40px; width: 12px; height: 60px; background: #a97b58; border-radius: 6px; box-shadow: 0 -4px 0 rgba(0,0,0,0.06) inset; }
+		.tree .canopy { position: absolute; bottom: 48px; left: 10px; width: 70px; height: 70px; background: radial-gradient(circle at 40% 30%, #c7f7d5, #8fe0b6); border-radius: 60px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.06)); animation: sway 3.8s ease-in-out infinite; }
+		.tree .canopy::before, .tree .canopy::after { content: ''; position: absolute; width: 56px; height: 56px; background: inherit; border-radius: 60px; }
+		.tree .canopy::before { left: -20px; top: 10px; }
+		.tree .canopy::after { right: -18px; top: 12px; }
 
 		.clouds {
 			position: absolute; inset: 0; z-index: 0; overflow: hidden;
@@ -168,9 +187,10 @@
 		.grid {
 			position: relative; z-index: 2;
 			width: min(560px, 92vw);
-			margin-bottom: 12vh;
-			min-height: 40vh;
+			margin-bottom: 18vh;
+			min-height: 46vh;
 			display: grid; place-items: center;
+			align-self: end;
 		}
 
 		.flowers-area, .watering-area, .butterfly-area, .grand-area { position: relative; width: 100%; height: 100%; }
@@ -190,6 +210,10 @@
 		.soil.wet { filter: saturate(1.2) brightness(0.95); }
 
 		.cocoon { position: absolute; width: 40px; height: 60px; background: linear-gradient(180deg, #eaddff, #cbb7ff); border: 2px solid #b79ef5; border-radius: 22px; transform: translate(-50%, -50%); box-shadow: inset 0 6px 10px rgba(0,0,0,0.08); cursor: pointer; touch-action: manipulation; }
+		/* Decorative branches to hang cocoons */
+		.branch { position: absolute; height: 8px; background: linear-gradient(180deg, #9b7a57, #7e5d3e); border-radius: 6px; transform: translate(-50%, -50%); box-shadow: 0 2px 0 rgba(0,0,0,0.05) inset; pointer-events: none; }
+		.branch .leaf { position: absolute; width: 16px; height: 12px; background: radial-gradient(circle at 40% 40%, #bff4e3, #87e0c7); border-radius: 12px 12px 12px 2px; transform-origin: 0% 50%; animation: sway 2.8s ease-in-out infinite; }
+		.branch .leaf.r { border-radius: 12px 12px 2px 12px; }
 		.butterfly { position: absolute; width: 36px; height: 28px; transform: translate(-50%, -50%); }
 		.butterfly .wing { position: absolute; width: 50%; height: 100%; background: radial-gradient(circle at 60% 40%, var(--lilac), var(--pink)); border-radius: 50% 60% 60% 50% / 60% 60% 40% 40%; transform-origin: 0% 50%; }
 		.butterfly .wing.right { left: 50%; transform-origin: 100% 50%; border-radius: 60% 50% 50% 60% / 60% 40% 60% 60%; }
@@ -216,6 +240,7 @@
 <body>
 	<div id='app'>
 		<div class='sky'></div>
+		<div class='hills' id='hills'></div>
 		<div class='clouds'>
 			<div class='cloud' style='width:80px;height:40px;top:15%;left:10%;animation-delay:-3s;'>
 				<div style='position:absolute;width:40px;height:40px;top:-20px;left:10px;background:rgba(255,255,255,0.6);border-radius:50px;'></div>
@@ -630,24 +655,47 @@
 			setTimeout(function() { const b = document.getElementById('intro-bubble'); if (b) { safeShow(b); bounce(b.querySelector('.dialog')); } }, 1200);
 		}
 
-		// Ground decorations
+		// Scenery layers
+		setupHills();
 		setupGroundDecor();
+		spawnExtraClouds();
 	});
 
 	function setupGroundDecor() {
 		const container = document.getElementById('ground-decor'); if (!container) return; container.innerHTML = '';
 		const width = container.clientWidth || window.innerWidth;
 		function place(el, leftPct, bottomPx) { el.style.left = leftPct + '%'; el.style.bottom = bottomPx + 'px'; container.appendChild(el); }
-		for (let i = 0; i < 14; i++) {
+		for (let i = 0; i < 16; i++) {
 			const t = document.createElement('div'); t.className = 'tuft';
 			place(t, 5 + Math.random() * 90, 20 + Math.random() * 30);
 		}
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 6; i++) {
 			const m = document.createElement('div'); m.className = 'mushroom';
 			place(m, 10 + Math.random() * 80, 18 + Math.random() * 12);
 		}
-		for (let i = 0; i < 6; i++) { const r = document.createElement('div'); r.className = 'rock'; place(r, 6 + Math.random() * 88, 14 + Math.random() * 10); }
-		for (let i = 0; i < 10; i++) { const f = document.createElement('div'); f.className = 'mini-flower'; place(f, 8 + Math.random() * 84, 24 + Math.random() * 20); }
+		for (let i = 0; i < 8; i++) { const r = document.createElement('div'); r.className = 'rock'; place(r, 6 + Math.random() * 88, 14 + Math.random() * 10); }
+		for (let i = 0; i < 12; i++) { const f = document.createElement('div'); f.className = 'mini-flower'; place(f, 8 + Math.random() * 84, 24 + Math.random() * 20); }
+		for (let i = 0; i < 6; i++) { const b = document.createElement('div'); b.className = 'bush' + (Math.random() > 0.5 ? ' large' : ''); place(b, 8 + Math.random() * 84, 26 + Math.random() * 10); }
+		for (let i = 0; i < 3; i++) { const tree = document.createElement('div'); tree.className = 'tree'; tree.innerHTML = "<div class='trunk'></div><div class='canopy'></div>"; place(tree, 12 + Math.random() * 76, 28 + Math.random() * 8); }
+	}
+
+	function setupHills() {
+		const container = document.getElementById('hills'); if (!container) return; container.innerHTML = '';
+		const leftHill = document.createElement('div'); leftHill.className = 'hill tint'; leftHill.style.left = '-6vw';
+		const rightHill = document.createElement('div'); rightHill.className = 'hill small'; rightHill.style.right = '-8vw';
+		container.appendChild(leftHill); container.appendChild(rightHill);
+	}
+
+	function spawnExtraClouds() {
+		const clouds = document.querySelector('.clouds'); if (!clouds) return;
+		for (let i = 0; i < 4; i++) {
+			const c = document.createElement('div'); c.className = 'cloud';
+			const w = 60 + Math.random() * 80; const h = w * 0.55; c.style.width = w + 'px'; c.style.height = h + 'px';
+			c.style.top = (8 + Math.random() * 26) + '%'; c.style.left = (5 + Math.random() * 80) + '%'; c.style.animationDelay = (-Math.random() * 12) + 's';
+			const b1 = document.createElement('div'); b1.style.position = 'absolute'; b1.style.width = (w*0.45) + 'px'; b1.style.height = (w*0.45) + 'px'; b1.style.top = (-h*0.45) + 'px'; b1.style.left = (w*0.1) + 'px'; b1.style.background = 'rgba(255,255,255,0.6)'; b1.style.borderRadius = '50px';
+			const b2 = document.createElement('div'); b2.style.position = 'absolute'; b2.style.width = (w*0.55) + 'px'; b2.style.height = (w*0.55) + 'px'; b2.style.top = (-h*0.5) + 'px'; b2.style.right = (w*0.1) + 'px'; b2.style.background = 'rgba(255,255,255,0.6)'; b2.style.borderRadius = '50px';
+			c.appendChild(b1); c.appendChild(b2); clouds.appendChild(c);
+		}
 	}
 
 	// Flowers scene
@@ -655,7 +703,7 @@
 		const container = document.getElementById('flowers-area');
 		container.innerHTML = '';
 		const positions = [
-			[18, 75], [34, 82], [52, 78], [68, 85], [82, 75], [26, 88], [50, 90], [74, 85]
+			[16, 84], [30, 88], [44, 86], [58, 90], [72, 85], [22, 92], [50, 94], [78, 90]
 		];
 		let bloomed = 0; const total = positions.length;
 		positions.forEach(function(pos) {
@@ -667,18 +715,10 @@
 				spawnSparkles(node.offsetLeft, node.offsetTop);
 				audio.playBloom();
 				bloomed += 1;
-				console.log('Flower bloomed! Count:', bloomed, 'of', total);
 				if (bloomed === total) {
-					console.log('All flowers bloomed! Showing next button.');
 					document.getElementById('flowers-text').textContent = 'Wow, the first flowers are awake! You are amazing, Marija!';
 					const nextBtn = document.getElementById('btn-flowers-next');
-					console.log('Next button element:', nextBtn);
-					if (nextBtn) {
-						safeShow(nextBtn); 
-						bounce(nextBtn);
-					} else {
-						console.error('btn-flowers-next not found!');
-					}
+					if (nextBtn) { safeShow(nextBtn); bounce(nextBtn); }
 				}
 			}
 			node.addEventListener('click', handleFlowerTap);
@@ -720,10 +760,10 @@
 	// Watering scene
 	function setupWatering() {
 		const area = document.getElementById('watering-area'); area.innerHTML = '';
-		const soilPositions = [[22, 70],[50, 72],[78, 68]];
+		const soilPositions = [[22, 82],[50, 84],[78, 80]];
 		const soils = soilPositions.map(function(p) { const d = document.createElement('div'); d.className = 'soil dry'; d.style.left = p[0] + '%'; d.style.top = p[1] + '%'; area.appendChild(d); return d; });
 
-		const can = document.createElement('div'); can.className = 'watering-can'; can.style.left = '15%'; can.style.top = '45%';
+		const can = document.createElement('div'); can.className = 'watering-can'; can.style.left = '18%'; can.style.top = '50%';
 		can.innerHTML = getCanSVG() + "<div class='pour-stream' id='pour-stream'></div>";
 		area.appendChild(can);
 
@@ -763,7 +803,15 @@
 	// Butterflies scene
 	function setupButterflies() {
 		const area = document.getElementById('butterfly-area'); area.innerHTML = '';
-		const cocoons = [[24, 60],[42, 68],[60, 56],[74, 64],[30, 78],[68, 78]];
+		const branches = [ { x: 24, y: 46, w: 120, rot: -6 }, { x: 58, y: 44, w: 150, rot: 4 }, { x: 78, y: 48, w: 110, rot: -2 } ];
+		branches.forEach(function(br) {
+			const b = document.createElement('div'); b.className = 'branch';
+			b.style.left = br.x + '%'; b.style.top = br.y + '%'; b.style.width = br.w + 'px'; b.style.transform += ' rotate(' + br.rot + 'deg)';
+			const lf = document.createElement('div'); lf.className = 'leaf'; lf.style.left = '-8px'; lf.style.top = '-6px';
+			const rf = document.createElement('div'); rf.className = 'leaf r'; rf.style.right = '-8px'; rf.style.top = '-6px';
+			b.appendChild(lf); b.appendChild(rf); area.appendChild(b);
+		});
+		const cocoons = [[22, 52],[36, 50],[50, 48],[64, 50],[74, 52],[86, 50]];
 		let freed = 0; const total = cocoons.length;
 		cocoons.forEach(function(p) {
 			const c = document.createElement('div'); c.className = 'cocoon'; c.style.left = p[0] + '%'; c.style.top = p[1] + '%'; area.appendChild(c);
