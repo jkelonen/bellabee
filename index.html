@@ -233,34 +233,7 @@
 		<section id='scene-intro' class='scene active' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip1'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip1)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<div class='bee' data-variant='1' aria-label='Bella the Bee'></div>
 				</div>
 				<div class='bee-bubble' id='intro-bubble' style='display:none;'>
 					<div class='dialog'>Hi Marija! I'm Bella the Birthday Bee. Today is YOUR birthday! But oh no… the garden hasn't bloomed yet. Without your magic, the flowers won't wake up. Will you help me?<button class='close-speech' onclick='this.parentElement.parentElement.style.display="none"'>×</button></div>
@@ -275,34 +248,7 @@
 		<section id='scene-flowers' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing2' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip2'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip2)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing2)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing2)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<div class='bee' data-variant='2' aria-label='Bella the Bee'></div>
 				</div>
 				<div class='flowers-area' id='flowers-area'></div>
 				<div class='speech'><div class='dialog' id='flowers-text'>Tap the sleepy buds to wake the flowers!<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
@@ -314,34 +260,7 @@
 		<section id='scene-watering' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing3' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip3'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip3)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing3)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing3)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<div class='bee' data-variant='3' aria-label='Bella the Bee'></div>
 				</div>
 				<div class='watering-area' id='watering-area'></div>
 				<div class='speech'><div class='dialog' id='watering-text'>Drag the watering can over the dry soil.<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
@@ -353,32 +272,7 @@
 		<section id='scene-butterflies' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing4' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<rect x='32' y='50' width='76' height='40' fill='none' stroke='#5a3b2e' stroke-width='3'/>
-							<rect x='38' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='60' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='82' y='52' width='12' height='36' fill='#5a3b2e' rx='6'/>
-							<rect x='104' y='52' width='4' height='36' fill='#5a3b2e' rx='2'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing4)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing4)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<div class='bee' data-variant='4' aria-label='Bella the Bee'></div>
 				</div>
 				<div class='butterfly-area' id='butterfly-area'></div>
 				<div class='speech'><div class='dialog' id='butterfly-text'>Tap the cocoons to let the butterflies out!<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
@@ -390,34 +284,7 @@
 		<section id='scene-grand' class='scene' aria-live='polite'>
 			<div class='grid'>
 				<div class='bee-wrap'>
-					<svg class='bee' viewBox='0 0 140 140' aria-label='Bella the Bee'>
-						<defs>
-							<radialGradient id='gwing5' cx='50%' cy='50%' r='50%'>
-								<stop offset='0%' stop-color='#ffffff' stop-opacity='0.9'/>
-								<stop offset='100%' stop-color='#ffffff' stop-opacity='0.2'/>
-							</radialGradient>
-							<clipPath id='beeClip5'><ellipse cx='70' cy='70' rx='48' ry='40'/></clipPath>
-						</defs>
-						<g>
-							<ellipse cx='70' cy='70' rx='48' ry='40' fill='#ffd166' stroke='#5a3b2e' stroke-width='3'/>
-							<g clip-path='url(#beeClip5)'>
-								<rect x='22' y='58' width='96' height='12' rx='6' fill='#5a3b2e'/>
-								<rect x='22' y='76' width='96' height='12' rx='6' fill='#5a3b2e'/>
-							</g>
-							<path d='M118 70 l10 6 l0 -12 z' fill='#5a3b2e'/>
-							<path d='M52 96 l-12 8 M70 98 l0 10 M88 96 l12 8' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round' fill='none'/>
-							<circle cx='54' cy='66' r='4' fill='#5a3b2e'/>
-							<circle cx='86' cy='66' r='4' fill='#5a3b2e'/>
-							<path d='M56 82 Q70 90 84 82' fill='none' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<ellipse cx='40' cy='46' rx='18' ry='12' fill='url(#gwing5)'/>
-							<ellipse cx='100' cy='46' rx='18' ry='12' fill='url(#gwing5)'/>
-							<circle cx='36' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M36 30 L30 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<circle cx='104' cy='30' r='4' fill='#5a3b2e'/>
-							<path d='M104 30 L110 18' stroke='#5a3b2e' stroke-width='3' stroke-linecap='round'/>
-							<path d='M48 26 l18 -8 l18 8 l-3 8 l-30 0 z' fill='var(--pink)' stroke='#a65b7a' stroke-width='2'/>
-						</g>
-					</svg>
+					<img class='bee' src='bees.svg' alt='Bella the Bee'/>
 				</div>
 				<div class='grand-area' id='grand-area'></div>
 				<div class='speech'><div class='dialog' id='grand-text'>You did it, Marija! The garden is alive, just like your bright spirit. The flowers and I have a special gift for you…<button class='close-speech' onclick='this.parentElement.parentElement.classList.add("hidden")'>×</button></div></div>
@@ -566,8 +433,49 @@
 
 	const audio = new AudioManager();
 
+	// Bee asset injection
+	/** @type {Document|null} */
+	let beesSvgDoc = null;
+	function loadBeesSvg() {
+		return new Promise(function(resolve, reject) {
+			if (beesSvgDoc) { resolve(beesSvgDoc); return; }
+			fetch('bees.svg').then(function(res) { return res.text(); }).then(function(txt) {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(txt, 'image/svg+xml');
+				beesSvgDoc = doc; resolve(doc);
+			}).catch(reject);
+		});
+	}
+
+	/** @param {HTMLElement} el @param {number} variant */
+	function injectBeeVariant(el, variant) {
+		loadBeesSvg().then(function(doc) {
+			const root = doc.documentElement;
+			const groups = root.querySelectorAll(':scope > g');
+			const idx = Math.max(1, Math.min(variant, groups.length)) - 1;
+			const g = groups[idx] ? groups[idx].cloneNode(true) : null;
+			if (!g) return;
+			const svgNS = 'http://www.w3.org/2000/svg';
+			const svg = document.createElementNS(svgNS, 'svg');
+			svg.setAttribute('viewBox', root.getAttribute('viewBox') || '0 0 4000 4000');
+			svg.setAttribute('width', '100%');
+			svg.setAttribute('height', '100%');
+			svg.setAttribute('aria-hidden', 'true');
+			svg.appendChild(g);
+			el.innerHTML = '';
+			el.appendChild(svg);
+		}).catch(function() {
+			// Fallback: do nothing if asset fails to load
+		});
+	}
+
 	// Initialize
 	document.addEventListener('DOMContentLoaded', function() {
+		// Inject bee variants
+		document.querySelectorAll('.bee[data-variant]').forEach(function(node) {
+			var v = parseInt(node.getAttribute('data-variant') || '1', 10) || 1;
+			injectBeeVariant(/** @type {HTMLElement} */(node), v);
+		});
 		// Intro
 		function startGame() {
 			console.log('Start button clicked!');
