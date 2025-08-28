@@ -218,8 +218,9 @@ document.addEventListener('DOMContentLoaded', function() {
         goTo('scene-flowers');
         setupFlowers();
     }
-    document.getElementById('btn-start').addEventListener('click', startGame);
-    document.getElementById('btn-start').addEventListener('touchend', function(e) { e.preventDefault(); startGame(); });
+    const startBtnEl = document.getElementById('btn-start');
+    startBtnEl.addEventListener('click', function() { if (startBtnEl.dataset.role === 'start') startGame(); });
+    startBtnEl.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtnEl.dataset.role === 'start') startGame(); });
 
     // Next buttons
     document.getElementById('btn-flowers-next').addEventListener('click', function() {
@@ -295,17 +296,88 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Intro bee fly-in & bubble
+    // Intro bee fly-in with delay, staged dialog, delayed start button
     const beeIntro = document.querySelector('#scene-intro .bee');
-    if (beeIntro) {
-        beeIntro.classList.add('bee-fly-in');
-        setTimeout(function() { 
-            const b = document.querySelector('#scene-intro .bee-speech-bubble'); 
-            if (b) { 
-                b.classList.add('visible'); 
-                bounce(b.querySelector('.dialog')); 
-            } 
-        }, 1200);
+    const introBubble = document.getElementById('intro-bubble');
+    const introDialog = introBubble ? introBubble.querySelector('.dialog') : null;
+    const startBtn = document.getElementById('btn-start');
+    if (beeIntro && introBubble && introDialog && startBtn) {
+        // Ensure single, anchored HUD button is used throughout intro
+        startBtn.dataset.role = 'next';
+        startBtn.textContent = 'Next';
+        startBtn.classList.remove('visible');
+
+        // Set initial position to match animation start before adding class
+        beeIntro.style.transform = 'translate(-150%, -60%) scale(0.6) rotate(-10deg)';
+        beeIntro.style.opacity = '0';
+
+        // Small delay before starting fly-in to feel natural
+        const flyInDelay = 500; // ms
+        setTimeout(function() {
+            requestAnimationFrame(function() {
+                beeIntro.classList.add('bee-fly-in');
+            });
+        }, flyInDelay);
+
+        // After fly-in completes, begin staged messages and bounce
+        const flyInDuration = 1200; // must match CSS
+        setTimeout(function() {
+            // Switch to continuous bounce
+            beeIntro.classList.remove('bee-fly-in');
+            beeIntro.style.transform = '';
+            beeIntro.style.opacity = '';
+            beeIntro.classList.add('bee-bounce');
+
+            // Stage the intro dialog into multiple lines with manual progression (single HUD button)
+            const messages = [
+                "Hi Marija! I'm Bella the Birthday Bee.",
+                'Today is YOUR birthday! But oh no… the garden has not bloomed yet.',
+                "Without your magic, the flowers won't wake up. Will you help me?"
+            ];
+
+            let messageIdx = 0;
+            
+            // Reuse startBtn as the Next button during intro
+            
+            function showCurrentMessage() {
+                if (messageIdx >= messages.length) {
+                    return;
+                }
+                
+                // Show current message
+                introBubble.classList.add('visible');
+                introDialog.textContent = messages[messageIdx];
+                introDialog.classList.remove('attention');
+                void introDialog.offsetWidth; // reflow to restart animation
+                introDialog.classList.add('attention');
+                
+                // Reveal the HUD button (as Next) after first message displays
+                if (messageIdx === 0) {
+                    setTimeout(function() { 
+                        safeShow(startBtn);
+                        bounce(startBtn);
+                    }, 1500);
+                }
+                
+                // If this is the last message, change the button to Start immediately
+                if (messageIdx === messages.length - 1) {
+                    startBtn.dataset.role = 'start';
+                    startBtn.textContent = "Yes, I'll help!";
+                    // keep button visible, just give a subtle bounce
+                    bounce(startBtn);
+                }
+                
+                messageIdx++;
+            }
+            
+            // Next button click handler
+            function handleNext() { audio.playChime(); showCurrentMessage(); }
+            startBtn.addEventListener('click', function() { if (startBtn.dataset.role === 'next') handleNext(); });
+            startBtn.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtn.dataset.role === 'next') handleNext(); });
+
+            // Start first message after a tiny beat
+            setTimeout(showCurrentMessage, 200);
+        }, flyInDelay + flyInDuration);
     }
 
 

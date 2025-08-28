@@ -156,6 +156,9 @@ box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--focus-ring);
     100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
 }
 
+/* Continuous bouncing after intro */
+.bee-bounce { animation: bee-bob 2.3s ease-in-out infinite; }
+
 /* Bee speech bubble */
 .bee-speech-bubble { 
     position: absolute; 
