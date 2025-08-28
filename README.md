@@ -1,4 +1,4 @@
-## Marija’s Birthday Garden — Context for AI Agents
+## Marija’s Birthday Garden
 
 ### Overview
 Marija’s Birthday Garden is a short, browser-based mobile game built as a single static page (`index.html`) using pure HTML/CSS/JS. The game runs smoothly on iPhone Safari, lasts ~3–5 minutes, and ends by revealing a QR code linking to a gift card. The theme is cute, pastel, birthday-themed, starring a kawaii bee named Bella.
