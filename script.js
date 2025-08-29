@@ -17,6 +17,22 @@ function bounce(el) { el.animate([{ transform: 'scale(1)' }, { transform: 'scale
 /** @param {DOMRect} a @param {DOMRect} b */
 function rectsOverlap(a, b) { return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom); }
 
+/** More precise watering can collision - requires center-to-center proximity */
+function isWateringCanOverSoil(canRect, soilRect) {
+    const canCenterX = canRect.left + canRect.width / 2;
+    const canCenterY = canRect.top + canRect.height / 2;
+    const soilCenterX = soilRect.left + soilRect.width / 2;
+    const soilCenterY = soilRect.top + soilRect.height / 2;
+    
+    // Distance between centers
+    const dx = canCenterX - soilCenterX;
+    const dy = canCenterY - soilCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Require watering can center to be within 45px of soil center
+    return distance < 45;
+}
+
 /**
  * Show text with a delay and start playing song
  * @param {string} text - Text to display
@@ -40,7 +56,14 @@ function showDelayedTextWithSong(text, delayMs, targetElement) {
 // Scene control
 const scenes = ['scene-intro', 'scene-flowers', 'scene-watering', 'scene-butterflies', 'scene-grand'];
 let currentScene = 'scene-intro';
+let wateringProgressCheckInterval = null; // Global for cleanup across scenes
 function goTo(sceneId) {
+    // Clean up watering progress checking when leaving watering scene
+    if (currentScene === 'scene-watering' && wateringProgressCheckInterval) {
+        clearInterval(wateringProgressCheckInterval);
+        wateringProgressCheckInterval = null;
+    }
+    
     // Hide all speech bubbles first
     scenes.forEach(function(id) { 
         const scene = document.getElementById(id);
@@ -61,6 +84,8 @@ class AudioManager {
         this.masterGain = null;
         this.noiseNode = null;
         this.pouring = false;
+        this.plantWateringNode = null;
+        this.plantWatering = false;
         this.bgInterval = null;
         this.songAudio = null;
         this.songGain = null;
@@ -116,6 +141,45 @@ class AudioManager {
         this.noiseNode = noise;
     }
     stopPour() { if (this.noiseNode) { try { this.noiseNode.stop(); } catch(e){} this.noiseNode.disconnect(); this.noiseNode = null; } this.pouring = false; }
+    
+    startPlantWatering() {
+        if (!this.context || this.plantWatering) return; 
+        this.plantWatering = true;
+        
+        // Create a gentler, more soothing watering sound for plant watering
+        const bufferSize = this.context.sampleRate;
+        const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) { 
+            output[i] = (Math.random() * 2 - 1) * 0.15; // Quieter than pour sound
+        }
+        
+        const noise = this.context.createBufferSource(); 
+        noise.buffer = noiseBuffer; 
+        noise.loop = true;
+        
+        // Use a lower frequency for a more gentle sound
+        const lowpass = this.context.createBiquadFilter(); 
+        lowpass.type = 'lowpass'; 
+        lowpass.frequency.value = 600; 
+        lowpass.Q.value = 1.2;
+        
+        const gain = this.context.createGain(); 
+        gain.gain.value = 0.05; // Even quieter volume
+        
+        noise.connect(lowpass).connect(gain).connect(this.masterGain); 
+        noise.start();
+        this.plantWateringNode = noise;
+    }
+    
+    stopPlantWatering() { 
+        if (this.plantWateringNode) { 
+            try { this.plantWateringNode.stop(); } catch(e){} 
+            this.plantWateringNode.disconnect(); 
+            this.plantWateringNode = null; 
+        } 
+        this.plantWatering = false; 
+    }
     playFlutter() {
         if (!this.context) return;
         const now = this.context.currentTime;
@@ -908,6 +972,16 @@ function setupWatering() {
 
     let watering = false; let wateredCount = 0;
     let dropletInterval = null;
+    
+    // Watering timer system
+    let currentHoveredSoil = null;
+    let hoverStartTime = 0;
+    let wateringProgressIndicators = new Map();
+    let lastValidSoil = null; // For smoothing transitions
+    let toleranceTimer = null; // For preventing accidental resets
+    // progressCheckInterval is now global as wateringProgressCheckInterval
+    const WATERING_DURATION = 2500; // 2.5 seconds to water each plant
+    const TOLERANCE_DELAY = 150; // ms to wait before resetting progress
 
     function spawnWaterDroplet() {
         const droplet = document.createElement('div');
@@ -918,6 +992,36 @@ function setupWatering() {
         setTimeout(() => droplet.remove(), 850);
     }
 
+    function createProgressIndicator(soil) {
+        const indicator = document.createElement('div');
+        indicator.className = 'watering-progress-ring';
+        indicator.innerHTML = `
+            <svg width="48" height="48">
+                <circle cx="24" cy="24" r="22" />
+            </svg>
+        `;
+        soil.appendChild(indicator);
+        return indicator;
+    }
+
+    function updateProgressIndicator(soil, progress) {
+        let indicator = wateringProgressIndicators.get(soil);
+        if (!indicator) {
+            indicator = createProgressIndicator(soil);
+            wateringProgressIndicators.set(soil, indicator);
+        }
+        
+        indicator.style.opacity = progress > 0 ? '1' : '0';
+        
+        const circle = indicator.querySelector('circle');
+        if (circle) {
+            const circumference = 2 * Math.PI * 22; // radius = 22px
+            const offset = circumference - (progress * circumference);
+            circle.style.strokeDasharray = `${circumference}`;
+            circle.style.strokeDashoffset = `${offset}`;
+        }
+    }
+
     function onPointerDown(ev) { 
         watering = true; 
         can.setPointerCapture(ev.pointerId); 
@@ -925,16 +1029,111 @@ function setupWatering() {
         audio.startPour(); 
         dropletInterval = setInterval(spawnWaterDroplet, 120);
     }
+    
     function onPointerMove(ev) {
         if (!watering) return;
-        const rect = area.getBoundingClientRect(); const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
-        can.style.left = (x / rect.width * 100) + '%'; can.style.top = (y / rect.height * 100) + '%';
+        const rect = area.getBoundingClientRect(); 
+        const x = ev.clientX - rect.left; 
+        const y = ev.clientY - rect.top;
+        can.style.left = (x / rect.width * 100) + '%'; 
+        can.style.top = (y / rect.height * 100) + '%';
+        
+        checkWateringProgress();
+    }
+    
+    function checkWateringProgress() {
+        let foundHoveredSoil = null;
+        const canRect = can.getBoundingClientRect();
+        
+        // Check which soil patch we're hovering over with precise detection
         soils.forEach(function(s) {
             if (s.classList.contains('wet')) return;
-            if (rectsOverlap(can.getBoundingClientRect(), s.getBoundingClientRect())) {
-                s.classList.remove('dry'); s.classList.add('wet'); wateredCount += 1;
-                const flower = createFlower({ xPercent: parseFloat(s.style.left), yPercent: parseFloat(s.style.top) - 6, asBud: false });
-                area.appendChild(flower); spawnSparkles(s); audio.playBloom();
+            if (isWateringCanOverSoil(canRect, s.getBoundingClientRect())) {
+                foundHoveredSoil = s;
+            }
+        });
+        
+        // Clear any pending tolerance timer if we found a valid soil
+        if (foundHoveredSoil && toleranceTimer) {
+            clearTimeout(toleranceTimer);
+            toleranceTimer = null;
+        }
+        
+        // Handle hover state changes with smoothing
+        if (foundHoveredSoil !== currentHoveredSoil) {
+            // If we're moving away from a soil, add tolerance delay
+            if (currentHoveredSoil && !foundHoveredSoil) {
+                if (!toleranceTimer) {
+                    toleranceTimer = setTimeout(() => {
+                        // Only reset if we're still not over any soil after delay
+                        let stillNotOverSoil = true;
+                        const currentCanRect = can.getBoundingClientRect();
+                        soils.forEach(function(s) {
+                            if (!s.classList.contains('wet') && 
+                                isWateringCanOverSoil(currentCanRect, s.getBoundingClientRect())) {
+                                stillNotOverSoil = false;
+                            }
+                        });
+                        
+                        if (stillNotOverSoil && currentHoveredSoil) {
+                            updateProgressIndicator(currentHoveredSoil, 0);
+                            audio.stopPlantWatering();
+                            currentHoveredSoil = null;
+                            hoverStartTime = 0;
+                        }
+                        toleranceTimer = null;
+                    }, TOLERANCE_DELAY);
+                }
+                return; // Don't immediately change state
+            }
+            
+            // Moving to a new soil - reset previous if any
+            if (currentHoveredSoil && foundHoveredSoil && currentHoveredSoil !== foundHoveredSoil) {
+                updateProgressIndicator(currentHoveredSoil, 0);
+                audio.stopPlantWatering();
+            }
+            
+            // Start timing new soil
+            currentHoveredSoil = foundHoveredSoil;
+            hoverStartTime = foundHoveredSoil ? Date.now() : 0;
+            
+            // Start plant watering sound if hovering over a new soil
+            if (foundHoveredSoil) {
+                audio.startPlantWatering();
+            }
+        }
+        
+        // Update progress for currently hovered soil
+        if (currentHoveredSoil && !currentHoveredSoil.classList.contains('wet')) {
+            const elapsed = Date.now() - hoverStartTime;
+            const progress = Math.min(elapsed / WATERING_DURATION, 1);
+            
+            updateProgressIndicator(currentHoveredSoil, progress);
+            
+            // Complete watering if enough time has passed
+            if (elapsed >= WATERING_DURATION) {
+                const soil = currentHoveredSoil;
+                soil.classList.remove('dry'); 
+                soil.classList.add('wet'); 
+                wateredCount += 1;
+                
+                // Hide progress indicator
+                updateProgressIndicator(soil, 0);
+                
+                const flower = createFlower({ 
+                    xPercent: parseFloat(soil.style.left), 
+                    yPercent: parseFloat(soil.style.top) - 6, 
+                    asBud: false 
+                });
+                area.appendChild(flower); 
+                spawnSparkles(soil); 
+                audio.playBloom();
+                
+                // Reset hover tracking
+                currentHoveredSoil = null;
+                hoverStartTime = 0;
+                audio.stopPlantWatering(); // Stop plant watering sound
+                
                 if (wateredCount === soils.length) { 
                     const wt = document.getElementById('watering-text');
                     wt.textContent = 'So colorful! The garden is starting to celebrate you!';
@@ -946,8 +1145,9 @@ function setupWatering() {
                     bounce(btn);
                 }
             }
-        });
+        }
     }
+    
     function onPointerUp() { 
         watering = false; 
         can.classList.remove('pouring');
@@ -956,9 +1156,28 @@ function setupWatering() {
             clearInterval(dropletInterval);
             dropletInterval = null;
         }
+        
+        // Keep progress checking running even after pointer up
+        // This allows watering to continue when can is positioned over soil
+        
+        // Clear any pending tolerance timer
+        if (toleranceTimer) {
+            clearTimeout(toleranceTimer);
+            toleranceTimer = null;
+        }
     }
 
-    can.addEventListener('pointerdown', onPointerDown); can.addEventListener('pointermove', onPointerMove); can.addEventListener('pointerup', onPointerUp); can.addEventListener('pointercancel', onPointerUp); can.addEventListener('lostpointercapture', onPointerUp);
+    can.addEventListener('pointerdown', onPointerDown); 
+    can.addEventListener('pointermove', onPointerMove); 
+    can.addEventListener('pointerup', onPointerUp); 
+    can.addEventListener('pointercancel', onPointerUp); 
+    can.addEventListener('lostpointercapture', onPointerUp);
+    
+    // Clean up any existing interval and start continuous progress checking
+    if (wateringProgressCheckInterval) {
+        clearInterval(wateringProgressCheckInterval);
+    }
+    wateringProgressCheckInterval = setInterval(checkWateringProgress, 50); // Check every 50ms
 }
 
 function getCanSVG() {
