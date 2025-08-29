@@ -346,7 +346,7 @@ class AudioManager {
 
 const audio = new AudioManager();
 
-// Initialize
+    // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Intro
     function startGame() {
@@ -355,9 +355,27 @@ document.addEventListener('DOMContentLoaded', function() {
         audio.resume(); 
         audio.playChime(); 
         audio.startBackground();
-        // Background music already started on initial Start button
-        goTo('scene-flowers');
-        setupFlowers();
+        
+        // Show bee's positive response first
+        const introBubble = document.getElementById('intro-bubble');
+        const introDialog = introBubble ? introBubble.querySelector('.dialog') : null;
+        const startBtn = document.getElementById('btn-start');
+        
+        if (introDialog) {
+            introDialog.textContent = 'Great! I knew I could rely on you!';
+            introDialog.classList.remove('attention');
+            void introDialog.offsetWidth;
+            introDialog.classList.add('attention');
+        }
+        
+        // Hide the button temporarily
+        startBtn.classList.remove('visible');
+        
+        // Continue to flowers scene after a short delay
+        setTimeout(function() {
+            goTo('scene-flowers');
+            setupFlowers();
+        }, 2000);
     }
     const startBtnEl = document.getElementById('btn-start');
     startBtnEl.addEventListener('click', function() { if (startBtnEl.dataset.role === 'start-game') startGame(); });
@@ -478,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const messages = [
                     "Hi Marija! I'm Bella the Birthday Bee.",
                     'Today is YOUR birthday! But oh no… the garden has not bloomed yet.',
-                    "Without your magic, the flowers won't wake up. Will you help me?"
+                    "Without your magic, the flowers won't wake up... Will you help me? I will give you something special if you do!"
                 ];
 
                 let messageIdx = 0;
