@@ -585,11 +585,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function hideQrTitle() {
-        const qrTitle = document.getElementById('qr-title');
-        if (qrTitle) {
-            qrTitle.style.transition = 'opacity 800ms ease-out, transform 800ms ease-out';
-            qrTitle.style.opacity = '0';
-            qrTitle.style.transform = 'translateY(-20px)';
+        const qrCard = document.getElementById('qr-card');
+        if (qrCard) {
+            qrCard.style.transition = 'opacity 800ms ease-out, transform 800ms ease-out';
+            qrCard.style.opacity = '0';
+            qrCard.style.transform = 'translateY(-20px)';
         }
     }
 
@@ -607,10 +607,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         bubble.classList.add('visible');
         
-        // Keep the speech bubble visible for 3 seconds, then fly away
+        // Keep the speech bubble visible for 5 seconds, then fly away
         setTimeout(() => {
             beeFliesAway();
-        }, 3000);
+        }, 5000);
     }
 
     function beeFliesAway() {
@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Hide speech bubble
         if (bubble) {
-            bubble.style.transition = 'opacity 500ms ease-out';
+            bubble.style.transition = 'opacity 800ms ease-out';
             bubble.style.opacity = '0';
         }
         
