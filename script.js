@@ -911,35 +911,51 @@ function setupFlowers() {
         [15, 155], [30, 162], [45, 158], [60, 165], [75, 157], [20, 172], [50, 178], [80, 170]
     ];
     let bloomed = 0; const total = positions.length;
+
+    function bloomFlower(node) {
+        if (node.classList.contains('bloom')) return;
+        node.classList.remove('bud'); node.classList.add('bloom');
+        spawnSparkles(node);
+        audio.playBloom();
+        bloomed += 1;
+        if (bloomed === total) {
+            const flowersText = document.getElementById('flowers-text');
+            flowersText.textContent = 'Wow, the first flowers are awake! You are amazing, Marija!';
+            flowersText.classList.remove('attention');
+            void flowersText.offsetWidth;
+            flowersText.classList.add('attention');
+            const nextBtn = document.getElementById('btn-flowers-next');
+            if (nextBtn) {
+                safeShow(nextBtn);
+                bounce(nextBtn);
+            }
+        }
+    }
     positions.forEach(function(pos) {
         const node = createFlower({ xPercent: pos[0], yPercent: pos[1], asBud: true });
         container.appendChild(node);
-        function handleFlowerTap() {
-            if (node.classList.contains('bloom')) return;
-            node.classList.remove('bud'); node.classList.add('bloom');
-            spawnSparkles(node);
-            audio.playBloom();
-            bloomed += 1;
-            console.log('Flower bloomed! Count:', bloomed, 'of', total);
-            if (bloomed === total) {
-                console.log('All flowers bloomed! Showing next button.');
-                const flowersText = document.getElementById('flowers-text');
-                flowersText.textContent = 'Wow, the first flowers are awake! You are amazing, Marija!';
-                flowersText.classList.remove('attention');
-                void flowersText.offsetWidth;
-                flowersText.classList.add('attention');
-                const nextBtn = document.getElementById('btn-flowers-next');
-                console.log('Next button element:', nextBtn);
-                if (nextBtn) {
-                    safeShow(nextBtn); 
-                    bounce(nextBtn);
-                } else {
-                    console.error('btn-flowers-next not found!');
-                }
-            }
-        }
+        function handleFlowerTap() { bloomFlower(node); }
         node.addEventListener('click', handleFlowerTap);
         node.addEventListener('touchend', function(e) { e.preventDefault(); handleFlowerTap(); });
+    });
+
+    // Tap assist: if touch ends slightly off a bud, bloom nearest within radius
+    container.addEventListener('pointerup', function(e) {
+        if (e.pointerType !== 'touch') return;
+        const buds = Array.from(container.querySelectorAll('.flower.bud'));
+        if (!buds.length) return;
+        const x = e.clientX; const y = e.clientY;
+        let nearest = null; let minDist = Infinity;
+        buds.forEach(function(bud) {
+            const r = bud.getBoundingClientRect();
+            const cx = r.left + r.width / 2; const cy = r.top + r.height / 2;
+            const dx = x - cx; const dy = y - cy; const d = Math.hypot(dx, dy);
+            if (d < minDist) { minDist = d; nearest = bud; }
+        });
+        const RADIUS = 40; // px
+        if (nearest && minDist <= RADIUS) {
+            bloomFlower(nearest);
+        }
     });
 }
 
