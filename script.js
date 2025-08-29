@@ -343,9 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
         setupGrand();
     });
 
-    // Final button opens link
+    // Final button starts goodbye sequence
     document.getElementById('btn-open-link').addEventListener('click', function() {
-        window.open(SETTINGS.giftLink, '_blank');
+        startGoodbyeSequence();
     });
 
 
@@ -491,6 +491,241 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Goodbye sequence functions
+    function startGoodbyeSequence() {
+        // Step 1: Hide qr-title with smooth transition
+        hideQrTitle();
+        
+        // Step 2: Show bee's final goodbye message
+        setTimeout(() => {
+            showFinalGoodbyeBee();
+        }, 500);
+    }
+
+    function hideQrTitle() {
+        const qrTitle = document.getElementById('qr-title');
+        if (qrTitle) {
+            qrTitle.style.transition = 'opacity 800ms ease-out, transform 800ms ease-out';
+            qrTitle.style.opacity = '0';
+            qrTitle.style.transform = 'translateY(-20px)';
+        }
+    }
+
+    function showFinalGoodbyeBee() {
+        const grandScene = document.getElementById('scene-grand');
+        const bubble = grandScene.querySelector('.bee-speech-bubble');
+        const dialog = bubble.querySelector('.dialog');
+        
+        if (dialog) {
+            dialog.textContent = 'Thank you for bringing life to this garden, Marija! You made this the most beautiful birthday celebration. Now go enjoy your special gift! 🌸✨';
+            dialog.classList.remove('attention');
+            void dialog.offsetWidth;
+            dialog.classList.add('attention');
+        }
+        
+        bubble.classList.add('visible');
+        
+        // Keep the speech bubble visible for 3 seconds, then fly away
+        setTimeout(() => {
+            beeFliesAway();
+        }, 3000);
+    }
+
+    function beeFliesAway() {
+        const grandScene = document.getElementById('scene-grand');
+        const bee = grandScene.querySelector('.bee');
+        const bubble = grandScene.querySelector('.bee-speech-bubble');
+        
+        // Hide speech bubble
+        if (bubble) {
+            bubble.style.transition = 'opacity 500ms ease-out';
+            bubble.style.opacity = '0';
+        }
+        
+        // Animate bee flying off to the right
+        if (bee) {
+            bee.style.transition = 'transform 2s ease-in, opacity 2s ease-in';
+            bee.style.transform = 'translateX(150vw) translateY(-30px) rotate(15deg) scale(0.8)';
+            bee.style.opacity = '0';
+        }
+        
+        // Start kakola image sequence after bee flies away
+        setTimeout(() => {
+            startKakolaSequence();
+        }, 2200);
+    }
+
+    function startKakolaSequence() {
+        // Hide the current scene content
+        const grandScene = document.getElementById('scene-grand');
+        grandScene.style.transition = 'opacity 1s ease-out';
+        grandScene.style.opacity = '0';
+        
+        setTimeout(() => {
+            // Create kakola display container
+            createKakolaDisplay();
+        }, 1000);
+    }
+
+    function createKakolaDisplay() {
+        // Create new scene for kakola images
+        const app = document.getElementById('app');
+        const kakolaScene = document.createElement('div');
+        kakolaScene.id = 'kakola-scene';
+        kakolaScene.style.cssText = `
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #fdf2f8, #f3e8ff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            z-index: 10;
+        `;
+        
+        const imageContainer = document.createElement('div');
+        imageContainer.id = 'kakola-images';
+        imageContainer.style.cssText = `
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        
+        kakolaScene.appendChild(imageContainer);
+        app.appendChild(kakolaScene);
+        
+        // Fade in the kakola scene
+        setTimeout(() => {
+            kakolaScene.style.opacity = '1';
+            showKakolaImagesSequence();
+        }, 100);
+    }
+
+    function showKakolaImagesSequence() {
+        const imageContainer = document.getElementById('kakola-images');
+        const imageNames = ['kakola1.jpg', 'kakola2.jpg', 'kakola3.jpg'];
+        let currentIndex = 0;
+        
+        function showNextImage() {
+            if (currentIndex < imageNames.length) {
+                const img = document.createElement('img');
+                img.src = imageNames[currentIndex];
+                img.style.cssText = `
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    opacity: 0;
+                    transform: scale(0.9) translateY(20px);
+                    transition: opacity 1s ease-out, transform 1s ease-out;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                `;
+                
+                imageContainer.appendChild(img);
+                
+                // Animate image in
+                setTimeout(() => {
+                    img.style.opacity = '1';
+                    img.style.transform = 'scale(1) translateY(0)';
+                }, 100);
+                
+                currentIndex++;
+                
+                // Show next image after delay, or show final message if done
+                if (currentIndex < imageNames.length) {
+                    setTimeout(showNextImage, 2000);
+                } else {
+                    setTimeout(showFinalMessage, 2000);
+                }
+            }
+        }
+        
+        showNextImage();
+    }
+
+    function showFinalMessage() {
+        const kakolaScene = document.getElementById('kakola-scene');
+        
+        const messageBox = document.createElement('div');
+        messageBox.id = 'final-message-box';
+        messageBox.style.cssText = `
+            position: absolute;
+            bottom: 15vh;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            border: 2px solid var(--pink);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateX(-50%) translateY(30px) scale(0.9);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            max-width: 85vw;
+        `;
+        
+        const messageText = document.createElement('div');
+        messageText.style.cssText = `
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        `;
+        messageText.textContent = "Let's have a relaxing Sunday after a fantastic weekend at Kakola Spa.";
+        
+        const nextButton = document.createElement('button');
+        nextButton.className = 'btn visible';
+        nextButton.textContent = 'Next';
+        nextButton.style.margin = '0 auto';
+        nextButton.addEventListener('click', showTheEndMessage);
+        
+        messageBox.appendChild(messageText);
+        messageBox.appendChild(nextButton);
+        kakolaScene.appendChild(messageBox);
+        
+        // Animate message box in
+        setTimeout(() => {
+            messageBox.style.opacity = '1';
+            messageBox.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+        }, 200);
+    }
+
+    function showTheEndMessage() {
+        const messageBox = document.getElementById('final-message-box');
+        const messageText = messageBox.querySelector('div');
+        const nextButton = messageBox.querySelector('button');
+        
+        // Fade out current content
+        messageText.style.transition = 'opacity 600ms ease-out';
+        nextButton.style.transition = 'opacity 600ms ease-out';
+        messageText.style.opacity = '0';
+        nextButton.style.opacity = '0';
+        
+        setTimeout(() => {
+            // Replace with final message
+            messageText.textContent = 'The End, hope you enjoyed!';
+            messageText.style.fontSize = '24px';
+            messageText.style.fontWeight = '700';
+            messageText.style.color = 'var(--pink-strong)';
+            
+            // Hide the button
+            nextButton.style.display = 'none';
+            
+            // Fade in new content
+            setTimeout(() => {
+                messageText.style.opacity = '1';
+            }, 100);
+        }, 600);
+    }
 
 });
 
