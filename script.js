@@ -908,7 +908,7 @@ function setupFlowers() {
     const container = document.getElementById('flowers-area');
     container.innerHTML = '';
     const positions = [
-        [18, 160], [34, 165], [52, 162], [68, 168], [82, 160], [26, 170], [50, 175], [74, 168]
+        [15, 155], [30, 162], [45, 158], [60, 165], [75, 157], [20, 172], [50, 178], [80, 170]
     ];
     let bloomed = 0; const total = positions.length;
     positions.forEach(function(pos) {
