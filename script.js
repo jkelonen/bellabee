@@ -64,6 +64,8 @@ class AudioManager {
         this.bgInterval = null;
         this.songAudio = null;
         this.songGain = null;
+        this.bgAmbianceAudio = null;
+        this.bgAmbianceGain = null;
     }
     init() {
         if (this.context) return;
@@ -205,6 +207,77 @@ class AudioManager {
             this.songGain = null;
         }
     }
+    
+    async startBackgroundAmbiance() {
+        console.log('startBackgroundAmbiance called, context:', !!this.context, 'existing audio:', !!this.bgAmbianceAudio);
+        
+        if (!this.context) {
+            console.error('Audio context not initialized');
+            return;
+        }
+        
+        if (this.bgAmbianceAudio) {
+            console.log('Background ambiance already playing');
+            return;
+        }
+        
+        try {
+            console.log('Creating background ambiance audio element...');
+            
+            // Create audio element for background ambiance
+            this.bgAmbianceAudio = new Audio('bg-ambiance.mp3');
+            this.bgAmbianceAudio.crossOrigin = 'anonymous';
+            this.bgAmbianceAudio.loop = true; // Enable looping
+            this.bgAmbianceAudio.volume = 0.3; // Set volume directly on audio element as fallback
+            
+            console.log('Audio element created, setting up Web Audio API...');
+            
+            // Create audio context nodes
+            const source = this.context.createMediaElementSource(this.bgAmbianceAudio);
+            this.bgAmbianceGain = this.context.createGain();
+            
+            // Set fairly low volume
+            this.bgAmbianceGain.gain.value = 0.3;
+            
+            // Connect audio chain
+            source.connect(this.bgAmbianceGain);
+            this.bgAmbianceGain.connect(this.context.destination);
+            
+            console.log('Audio chain connected, attempting to play...');
+            
+            // Start playing
+            await this.bgAmbianceAudio.play();
+            
+            console.log('Background ambiance started successfully');
+            
+        } catch (error) {
+            console.error('Failed to play background ambiance:', error);
+            console.error('Error details:', error.message);
+            
+            // Fallback: try playing without Web Audio API
+            try {
+                console.log('Trying fallback approach...');
+                this.bgAmbianceAudio = new Audio('bg-ambiance.mp3');
+                this.bgAmbianceAudio.loop = true;
+                this.bgAmbianceAudio.volume = 0.3;
+                await this.bgAmbianceAudio.play();
+                console.log('Fallback background ambiance started');
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+            }
+        }
+    }
+    
+    stopBackgroundAmbiance() {
+        if (this.bgAmbianceAudio) {
+            this.bgAmbianceAudio.pause();
+            this.bgAmbianceAudio = null;
+        }
+        if (this.bgAmbianceGain) {
+            this.bgAmbianceGain.disconnect();
+            this.bgAmbianceGain = null;
+        }
+    }
 }
 
 const audio = new AudioManager();
@@ -214,13 +287,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Intro
     function startGame() {
         console.log('Start button clicked!');
-        audio.init(); audio.resume(); audio.playChime(); audio.startBackground();
+        audio.init(); 
+        audio.resume(); 
+        audio.playChime(); 
+        audio.startBackground();
+        // Background music already started on initial Start button
         goTo('scene-flowers');
         setupFlowers();
     }
     const startBtnEl = document.getElementById('btn-start');
-    startBtnEl.addEventListener('click', function() { if (startBtnEl.dataset.role === 'start') startGame(); });
-    startBtnEl.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtnEl.dataset.role === 'start') startGame(); });
+    startBtnEl.addEventListener('click', function() { if (startBtnEl.dataset.role === 'start-game') startGame(); });
+    startBtnEl.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtnEl.dataset.role === 'start-game') startGame(); });
 
     // Next buttons
     document.getElementById('btn-flowers-next').addEventListener('click', function() {
@@ -296,88 +373,122 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Intro bee fly-in with delay, staged dialog, delayed start button
+    // Intro scene setup - bee and dialog start hidden, show on Start button click
     const beeIntro = document.querySelector('#scene-intro .bee');
     const introBubble = document.getElementById('intro-bubble');
     const introDialog = introBubble ? introBubble.querySelector('.dialog') : null;
     const startBtn = document.getElementById('btn-start');
+    
     if (beeIntro && introBubble && introDialog && startBtn) {
-        // Ensure single, anchored HUD button is used throughout intro
-        startBtn.dataset.role = 'next';
-        startBtn.textContent = 'Next';
-        startBtn.classList.remove('visible');
-
-        // Set initial position to match animation start before adding class
+        // Hide bee and speech bubble initially
         beeIntro.style.transform = 'translate(-150%, -60%) scale(0.6) rotate(-10deg)';
         beeIntro.style.opacity = '0';
-
-        // Small delay before starting fly-in to feel natural
-        const flyInDelay = 500; // ms
-        setTimeout(function() {
-            requestAnimationFrame(function() {
-                beeIntro.classList.add('bee-fly-in');
-            });
-        }, flyInDelay);
-
-        // After fly-in completes, begin staged messages and bounce
-        const flyInDuration = 1200; // must match CSS
-        setTimeout(function() {
-            // Switch to continuous bounce
-            beeIntro.classList.remove('bee-fly-in');
-            beeIntro.style.transform = '';
-            beeIntro.style.opacity = '';
-            beeIntro.classList.add('bee-bounce');
-
-            // Stage the intro dialog into multiple lines with manual progression (single HUD button)
-            const messages = [
-                "Hi Marija! I'm Bella the Birthday Bee.",
-                'Today is YOUR birthday! But oh no… the garden has not bloomed yet.',
-                "Without your magic, the flowers won't wake up. Will you help me?"
-            ];
-
-            let messageIdx = 0;
+        introBubble.classList.remove('visible');
+        
+        // Set initial start button state
+        startBtn.dataset.role = 'start';
+        startBtn.textContent = 'Start';
+        
+        // Function to begin the intro sequence
+        function beginIntroSequence() {
+            startBtn.classList.remove('visible');
             
-            // Reuse startBtn as the Next button during intro
-            
-            function showCurrentMessage() {
-                if (messageIdx >= messages.length) {
-                    return;
-                }
+            // Longer delay to let background brighten first
+            const flyInDelay = 1500; // ms
+            setTimeout(function() {
+                requestAnimationFrame(function() {
+                    beeIntro.classList.add('bee-fly-in');
+                });
+            }, flyInDelay);
+
+            // After fly-in completes, begin staged messages and bounce
+            const flyInDuration = 1200; // must match CSS
+            setTimeout(function() {
+                // Switch to continuous bounce
+                beeIntro.classList.remove('bee-fly-in');
+                beeIntro.style.transform = '';
+                beeIntro.style.opacity = '';
+                beeIntro.classList.add('bee-bounce');
+
+                // Stage the intro dialog into multiple lines with manual progression
+                const messages = [
+                    "Hi Marija! I'm Bella the Birthday Bee.",
+                    'Today is YOUR birthday! But oh no… the garden has not bloomed yet.',
+                    "Without your magic, the flowers won't wake up. Will you help me?"
+                ];
+
+                let messageIdx = 0;
                 
-                // Show current message
-                introBubble.classList.add('visible');
-                introDialog.textContent = messages[messageIdx];
-                introDialog.classList.remove('attention');
-                void introDialog.offsetWidth; // reflow to restart animation
-                introDialog.classList.add('attention');
+                // Change button role to next for progression
+                startBtn.dataset.role = 'next';
+                startBtn.textContent = 'Next';
                 
-                // Reveal the HUD button (as Next) after first message displays
-                if (messageIdx === 0) {
-                    setTimeout(function() { 
-                        safeShow(startBtn);
+                function showCurrentMessage() {
+                    if (messageIdx >= messages.length) {
+                        return;
+                    }
+                    
+                    // Show current message
+                    introBubble.classList.add('visible');
+                    introDialog.textContent = messages[messageIdx];
+                    introDialog.classList.remove('attention');
+                    void introDialog.offsetWidth; // reflow to restart animation
+                    introDialog.classList.add('attention');
+                    
+                    // Reveal the HUD button (as Next) after first message displays
+                    if (messageIdx === 0) {
+                        setTimeout(function() { 
+                            safeShow(startBtn);
+                            bounce(startBtn);
+                        }, 1500);
+                    }
+                    
+                    // If this is the last message, change the button to start game
+                    if (messageIdx === messages.length - 1) {
+                        startBtn.dataset.role = 'start-game';
+                        startBtn.textContent = "Yes, I'll help!";
                         bounce(startBtn);
-                    }, 1500);
+                    }
+                    
+                    messageIdx++;
                 }
                 
-                // If this is the last message, change the button to Start immediately
-                if (messageIdx === messages.length - 1) {
-                    startBtn.dataset.role = 'start';
-                    startBtn.textContent = "Yes, I'll help!";
-                    // keep button visible, just give a subtle bounce
-                    bounce(startBtn);
-                }
-                
-                messageIdx++;
-            }
-            
-            // Next button click handler
-            function handleNext() { audio.playChime(); showCurrentMessage(); }
-            startBtn.addEventListener('click', function() { if (startBtn.dataset.role === 'next') handleNext(); });
-            startBtn.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtn.dataset.role === 'next') handleNext(); });
+                // Next button click handler
+                function handleNext() { audio.playChime(); showCurrentMessage(); }
+                startBtn.addEventListener('click', function() { if (startBtn.dataset.role === 'next') handleNext(); });
+                startBtn.addEventListener('touchend', function(e) { e.preventDefault(); if (startBtn.dataset.role === 'next') handleNext(); });
 
-            // Start first message after a tiny beat
-            setTimeout(showCurrentMessage, 200);
-        }, flyInDelay + flyInDuration);
+                // Start first message after a tiny beat
+                setTimeout(showCurrentMessage, 200);
+            }, flyInDelay + flyInDuration);
+        }
+        
+        // Handle initial Start button click
+        startBtn.addEventListener('click', function() { 
+            if (startBtn.dataset.role === 'start') {
+                audio.init(); 
+                audio.resume(); 
+                audio.playChime(); 
+                audio.startBackground();
+                audio.startBackgroundAmbiance(); // Start background music on initial Start button
+                // Trigger background fade to bright immediately
+                document.body.classList.add('game-started');
+                beginIntroSequence();
+            }
+        });
+        startBtn.addEventListener('touchend', function(e) { 
+            e.preventDefault(); 
+            if (startBtn.dataset.role === 'start') {
+                audio.init(); 
+                audio.resume(); 
+                audio.playChime(); 
+                audio.startBackground();
+                audio.startBackgroundAmbiance(); // Start background music on initial Start button
+                // Trigger background fade to bright immediately
+                document.body.classList.add('game-started');
+                beginIntroSequence();
+            }
+        });
     }
 
 
