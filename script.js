@@ -934,28 +934,38 @@ function setupFlowers() {
     positions.forEach(function(pos) {
         const node = createFlower({ xPercent: pos[0], yPercent: pos[1], asBud: true });
         container.appendChild(node);
-        function handleFlowerTap() { bloomFlower(node); }
+        let hasDirectTap = false;
+        function handleFlowerTap(e) { 
+            hasDirectTap = true;
+            e.stopPropagation();
+            bloomFlower(node); 
+        }
+        node.addEventListener('pointerdown', handleFlowerTap);
         node.addEventListener('click', handleFlowerTap);
-        node.addEventListener('touchend', function(e) { e.preventDefault(); handleFlowerTap(); });
+        node.addEventListener('touchstart', handleFlowerTap);
     });
 
     // Tap assist: if touch ends slightly off a bud, bloom nearest within radius
     container.addEventListener('pointerup', function(e) {
         if (e.pointerType !== 'touch') return;
-        const buds = Array.from(container.querySelectorAll('.flower.bud'));
-        if (!buds.length) return;
-        const x = e.clientX; const y = e.clientY;
-        let nearest = null; let minDist = Infinity;
-        buds.forEach(function(bud) {
-            const r = bud.getBoundingClientRect();
-            const cx = r.left + r.width / 2; const cy = r.top + r.height / 2;
-            const dx = x - cx; const dy = y - cy; const d = Math.hypot(dx, dy);
-            if (d < minDist) { minDist = d; nearest = bud; }
-        });
-        const RADIUS = 40; // px
-        if (nearest && minDist <= RADIUS) {
-            bloomFlower(nearest);
-        }
+        
+        // Brief delay to see if a direct tap occurred
+        setTimeout(() => {
+            const buds = Array.from(container.querySelectorAll('.flower.bud'));
+            if (!buds.length) return;
+            const x = e.clientX; const y = e.clientY;
+            let nearest = null; let minDist = Infinity;
+            buds.forEach(function(bud) {
+                const r = bud.getBoundingClientRect();
+                const cx = r.left + r.width / 2; const cy = r.top + r.height / 2;
+                const dx = x - cx; const dy = y - cy; const d = Math.hypot(dx, dy);
+                if (d < minDist) { minDist = d; nearest = bud; }
+            });
+            const RADIUS = 60; // px - increased for better mobile experience
+            if (nearest && minDist <= RADIUS) {
+                bloomFlower(nearest);
+            }
+        }, 10);
     });
 }
 

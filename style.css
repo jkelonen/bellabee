@@ -280,7 +280,7 @@ box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--focus-ring);
 
 .flowers-area, .watering-area, .butterfly-area, .grand-area { position: relative; width: 100%; height: 100%; }
 
-.flower { position: absolute; width: 64px; height: 64px; transform: translate(-50%, -50%) scale(0.8); transition: transform 300ms ease; cursor: pointer; touch-action: manipulation; }
+.flower { position: absolute; width: 80px; height: 80px; transform: translate(-50%, -50%) scale(0.9); transition: transform 300ms ease; cursor: pointer; touch-action: manipulation; }
 .flower.bud { filter: grayscale(0.8) brightness(0.9); opacity: 0.9; }
 .flower.bloom { transform: translate(-50%, -50%) scale(1); filter: none; cursor: default; }
 
